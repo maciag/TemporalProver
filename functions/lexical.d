@@ -13,12 +13,12 @@ import std.uni;
  */
 bool isVarChar(char c)
 {
-	return c.isAlpha() ||  c.isNumber();
+	return (c.isAlpha() && c.isLower()) || c.isNumber();
 }
 
 /**
- * Funkcja sprawdza, czy znak należy do operatora. Wykluczamy nawiasy i wykrzykniki, które
- * nie mogą wchodzić w skład innych operatorów
+ * Funkcja sprawdza, czy znak należy do operatora. Wykluczamy nawiasy i operatory
+ * jednoargumentowe (!, X, G, F), które zawsze są interpretowane jako osobne operatory
  * 
  * Params:
  * c = znak
@@ -28,7 +28,8 @@ bool isVarChar(char c)
  */
 bool isOpChar(char c)
 {
-	return !c.isAlpha() && !c.isNumber() && !c.isWhite && c != '(' && c != ')' && c !='!';
+	return !c.isAlpha() && !c.isNumber() && !c.isWhite && c != '(' && c != ')'
+				&& c !='!' && c != 'X' && c != 'G' && c != 'F';
 }
 
 /**
@@ -42,7 +43,8 @@ bool isOpChar(char c)
  */
 bool isOperator(char[] s)
 {
-	return s == "&" || s == "|" || s == "^" || s == ">" || s == "=" || s == "!";
+	return s == "&" || s == "|" || s == "^" || s == ">" || s == "=" || s == "!" ||
+				s == "U" || s == "X" || s == "G" || s == "F";
 }
 
 /**
@@ -60,13 +62,21 @@ bool hasNotLowerPrecedence(char[] op1, char[] op2)
 	switch(op1)
 	{
 		case "!":
+		case "X":
+		case "G":
+		case "F":
 		{
 			/*
-			 * Negację wykonujemy od prawej, więc (jakkolwiek to brzmi) musi mieć
-			 * priorytet mniejszy od samej siebie, zaś większy od każdego innego
-			 * operatora.
+			 * Te operacje wykonujemy od prawej, więc (jakkolwiek to brzmi) muszą
+			 * mieć priorytet mniejszy od samych siebie i od siebie nawzajem, zaś
+			 * większy od operatorów dwuargumentowych.
 			 */
-			return op2 != "!";
+			return op2 != "!" || op2 != "X" || op2 != "G" || op2 != "F";
+		}
+		
+		case "U":
+		{
+			return op2 == "U" || op2 == "&" || op2 == "|" || op2 == "^" || op2 == ">" || op2 == "=";
 		}
 		
 		case "&":
@@ -77,9 +87,13 @@ bool hasNotLowerPrecedence(char[] op1, char[] op2)
 		}
 		
 		case ">":
-		case "=":
 		{
 			return op2 == ">" || op2 == "=";
+		}
+		
+		case "=":
+		{
+			return op2 == "=";
 		}
 		
 		default:
@@ -103,6 +117,9 @@ int argumentCount(char[] operator)
 	switch(operator)
 	{
 		case "!":
+		case "X":
+		case "G":
+		case "F":
 		{
 			return 1;
 		}
@@ -112,13 +129,14 @@ int argumentCount(char[] operator)
 		case "^":
 		case ">":
 		case "=":
+		case "U":
 		{
 			return 2;
 		}
 		
 		default:
 		{
-			return 0;  // To nie powinno się zdarzyć
+			return 0;  // Nie jest operatorem
 		}
 	}
 }
@@ -185,6 +203,7 @@ char[] lparse(ref char[] src)
 	 */
 	char[] word = src[0..pos+1].stripLeft();
 	src = src[pos+1..$];  // Realokacja, ale chyba nie da się jej uniknąć
+	
 	return word;
 }
 
@@ -216,10 +235,8 @@ bool validate(char[] infix)
 		// Koniec formuły
 		if(token == "")
 		{
-			// Zabroniony po operatorze dwuargumentowym, negacji, nawiasie otwierającym i na początku
-			if(previousType == "&" || previousType == "|" || previousType == "^" ||
-				previousType == ">" || previousType == "=" || previousType == "!" ||
-				previousType == "(" || previousType == "")
+			// Zabroniony po operatorach jedno- i dwuargumentowych, nawiasie otwierającym i na początku
+			if(argumentCount(previousType) > 0 || previousType == "(" || previousType == "")
 			{
 				return false;
 			}
@@ -245,12 +262,10 @@ bool validate(char[] infix)
 		}
 		
 		// Operator dwuargumentowy
-		else if(token == "&" || token == "|" || token == "^" || token == ">" || token == "=")
+		else if(argumentCount(token) == 2)
 		{
-			// Zabroniony po operatorze dwuargumentowym, negacji, nawiasie otwierającym i na początku
-			if(previousType == "&" || previousType == "|" || previousType == "^" ||
-				previousType == ">" || previousType == "=" || previousType == "!" ||
-				previousType == "(" || previousType == "")
+			// Zabroniony po operatorze jedno- lub dwuargumentowym, nawiasie otwierającym i na początku
+			if(argumentCount(previousType) > 0 || previousType == "(" || previousType == "")
 			{
 				return false;
 			}
@@ -258,8 +273,8 @@ bool validate(char[] infix)
 			previousType = token;
 		}
 		
-		// Negacja
-		else if(token == "!")
+		// Operator jednoargumentowy
+		else if(argumentCount(token) == 1)
 		{
 			// Zabroniony po zmiennej i nawiasie zamykającym
 			if(previousType == "var" || previousType == ")")
@@ -289,10 +304,8 @@ bool validate(char[] infix)
 		{
 			bracketBalance--;
 			
-			// Zabroniony po operatorze dwuargumentowym, negacji, nawiasie otwierającym i na początku
-			if(previousType == "&" || previousType == "|" || previousType == "^" ||
-				previousType == ">" || previousType == "=" || previousType == "!" ||
-				previousType == "(" || previousType == "")
+			// Zabroniony po operatorze jedno- lub dwuargumentowym, nawiasie otwierającym i na początku
+			if(argumentCount(previousType) > 0 || previousType == "(" || previousType == "")
 			{
 				return false;
 			}

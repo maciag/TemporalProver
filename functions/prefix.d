@@ -40,7 +40,7 @@ char[] pop(ref char[] stack)
 }
 
 /**
- * Funkcja wrzucająca słowo na stod.
+ * Funkcja wrzucająca słowo na stos.
  * 
  * Params:
  * stack = Stos w stringu
