@@ -4,7 +4,7 @@
 #include <iostream>
 #include <string>
 
-#include "functions/prefix.h"
+#include "../functions/prefix.h"
 #include "LexicalTable.hpp"
 
 using namespace std;

@@ -1,5 +1,5 @@
-#include "include/tree.hh"
-#include "functions/prefix.h"
+#include "../include/tree.hh"
+#include "../functions/prefix.h"
 #include <string>
 #include <iostream>
 

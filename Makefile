@@ -1,25 +1,21 @@
-all: d_test cpp_test prover
+all: prover tester
 
-d_test: tester.d functions.a
-	dmd tester.d functions.a -ofd_test -Ifunctions
-	rm *.o
-
-cpp_test: tester.cpp functions.a
-	g++ -std=c++11 -c tester.cpp
-	dmd functions.a tester.o -ofcpp_test -L-lstdc++ -ofcpp_test
-	rm *.o
-
-prover: main.cpp TruthTree.cpp StringFormula.cpp functions.a
-	g++ -std=c++11 -c -o StringFormula.o StringFormula.cpp 
-	g++ -std=c++11 -c -o TruthTree.o -I ./include/ TruthTree.cpp 
-	g++ -std=c++11 -c -o main.o main.cpp
-	dmd functions.a main.o TruthTree.o StringFormula.o -ofcpp_test -L-lstdc++ -ofprover
-	rm *.o
+tester: tester.cpp prover
+	g++ -std=c++11 -c -o obj/tester.o tester.cpp
+	dmd -oftester lib/functions.a obj/tester.o obj/TruthTree.o obj/StringFormula.o obj/GUI.o -L-lstdc++ -L-lQt5Core -L-lQt5Gui -L-lQt5Quick -L-lQt5Qml -L-lQt5Widgets -L-lstdc++
 	
-functions.a: functions/prefix.d functions/lexical.d
-	dmd -lib functions/prefix.d functions/lexical.d -offunctions.a
+prover: main.cpp truthtrees/TruthTree.cpp truthtrees/StringFormula.cpp lib/functions.a obj/GUI.o
+	g++ -std=c++11 -c -o obj/StringFormula.o truthtrees/StringFormula.cpp 
+	g++ -std=c++11 -c -o obj/TruthTree.o -I ./include/ truthtrees/TruthTree.cpp 
+	g++ -std=c++11 -c -o obj/main.o main.cpp
+	dmd -ofprover lib/functions.a obj/main.o obj/TruthTree.o obj/StringFormula.o obj/GUI.o -L-lstdc++ -L-lQt5Core -L-lQt5Gui -L-lQt5Quick -L-lQt5Qml -L-lQt5Widgets -L-lstdc++
+	
+obj/GUI.o : gui/GUI.cpp gui/GUI.hpp
+	cd gui; qmake && make; cd ..
+	
+lib/functions.a: functions/prefix.d functions/lexical.d
+	dmd -lib functions/prefix.d functions/lexical.d -oflib/functions.a
 	
 clean:
-	rm d_test
-	rm prover
-	rm cpp_test
+	rm obj/*
+	rm lib/*
