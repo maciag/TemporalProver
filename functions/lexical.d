@@ -1,6 +1,86 @@
+import std.algorithm;
 import std.conv;
 import std.string;
 import std.uni;
+
+/// Kody błędów
+extern(C) const int ERRCODE_OK = 0;
+extern(C) const int ERRCODE_UNEXPECTED_END = 1;
+extern(C) const int ERRCODE_UNEXPECTED_VAR = 2;
+extern(C) const int ERRCODE_UNEXPECTED_BIN_OPER = 3;
+extern(C) const int ERRCODE_UNEXPECTED_UN_OPER = 4;
+extern(C) const int ERRCODE_UNEXPECTED_LBRACK = 5;
+extern(C) const int ERRCODE_UNEXPECTED_RBRACK = 6;
+extern(C) const int ERRCODE_INVALID_TOKEN = 7;
+extern(C) const int ERRCODE_BRACKET_UNCLOSED = 8;
+extern(C) const int ERRCODE_SPARE_RBRACE = 9;
+
+/// Informacje o błędzie - kod, początek i koniec
+int errorCode;
+int errorPosition;
+string errorToken;
+
+/// Struktura opisująca operator
+struct Operator
+{
+	string operator;
+	int precedence;
+	bool unary = false;
+}
+
+/// Mapa operatorów. NIE ZAWIERA NAWIASÓW!
+Operator[string] operators;
+
+/**
+ * Ustawia operator
+ * 
+ * Params:
+ * operator = ciąg znaków operatora
+ * precedence = priorytet operatora
+ * unary = jeden argument (jak false, to dwa). Operatory unarne stoją z przodu argumentu
+ */
+public void setOperator(string operator, int precedence, bool unary)
+{
+	Operator o = {operator, precedence, unary};
+	operators[operator] = o;
+}
+
+/**
+ * Usuwa operator z listy
+ * 
+ * Params:
+ * string operator = operator do usunięcia
+ */
+public void unsetOperator(string operator)
+{
+	operators.remove(operator);
+}
+
+/**
+ * Dodaje standardowe operatory
+ */
+public void resetOperators()
+{
+	clearOperators();
+	setOperator("&", 3, false);
+	setOperator("|", 3, false);
+	setOperator("^", 3, false);
+	setOperator(">", 2, false);
+	setOperator("=", 1, false);
+	setOperator("!", 5, true);
+	setOperator("U", 4, false);
+	setOperator("X", 5, true);
+	setOperator("G", 5, true);
+	setOperator("F", 5, true);
+}
+
+/**
+ * Czyści listę operatorów
+ */
+public void clearOperators()
+{
+	operators.clear();
+}
 
 /**
  * Funkcja sprawdza, czy znak należy do nazwy zmiennej
@@ -13,23 +93,7 @@ import std.uni;
  */
 bool isVarChar(char c)
 {
-	return (c.isAlpha() && c.isLower()) || c.isNumber();
-}
-
-/**
- * Funkcja sprawdza, czy znak należy do operatora. Wykluczamy nawiasy i operatory
- * jednoargumentowe (!, X, G, F), które zawsze są interpretowane jako osobne operatory
- * 
- * Params:
- * c = znak
- * 
- * Returns:
- * Czy należy do nazwy operatora
- */
-bool isOpChar(char c)
-{
-	return !c.isAlpha() && !c.isNumber() && !c.isWhite && c != '(' && c != ')'
-				&& c !='!' && c != 'X' && c != 'G' && c != 'F';
+	return (c.isAlpha() && c.isLower()) || c.isNumber() || c == '_';
 }
 
 /**
@@ -43,8 +107,13 @@ bool isOpChar(char c)
  */
 bool isOperator(char[] s)
 {
-	return s == "&" || s == "|" || s == "^" || s == ">" || s == "=" || s == "!" ||
-				s == "U" || s == "X" || s == "G" || s == "F";
+	foreach(string key; operators.keys)
+	{
+		if(s == key)
+			return true;
+	}
+	
+	return false;
 }
 
 /**
@@ -59,44 +128,16 @@ bool isOperator(char[] s)
  */
 bool hasNotLowerPrecedence(char[] op1, char[] op2)
 {
-	switch(op1)
+	if(op1 == op2)
+		return !operators[op1].unary;
+	
+	else
 	{
-		case "!":
-		case "X":
-		case "G":
-		case "F":
+		try
 		{
-			/*
-			 * Te operacje wykonujemy od prawej, więc (jakkolwiek to brzmi) muszą
-			 * mieć priorytet mniejszy od samych siebie i od siebie nawzajem, zaś
-			 * większy od operatorów dwuargumentowych.
-			 */
-			return op2 != "!" || op2 != "X" || op2 != "G" || op2 != "F";
+			return operators[op1].precedence >= operators[op2].precedence;
 		}
-		
-		case "U":
-		{
-			return op2 == "U" || op2 == "&" || op2 == "|" || op2 == "^" || op2 == ">" || op2 == "=";
-		}
-		
-		case "&":
-		case "|":
-		case "^":
-		{
-			return op2 == "&" || op2 == "|" || op2 == "^" || op2 == ">" || op2 == "=";
-		}
-		
-		case ">":
-		{
-			return op2 == ">" || op2 == "=";
-		}
-		
-		case "=":
-		{
-			return op2 == "=";
-		}
-		
-		default:
+		catch(RangeError)  // Pewnie któryś jest nawiasem
 		{
 			return false;
 		}
@@ -114,31 +155,30 @@ bool hasNotLowerPrecedence(char[] op1, char[] op2)
  */
 int argumentCount(char[] operator)
 {
-	switch(operator)
+	try
 	{
-		case "!":
-		case "X":
-		case "G":
-		case "F":
-		{
-			return 1;
-		}
-		
-		case "&":
-		case "|":
-		case "^":
-		case ">":
-		case "=":
-		case "U":
-		{
-			return 2;
-		}
-		
-		default:
-		{
-			return 0;  // Nie jest operatorem
-		}
+		return operators[operator].unary ? 1 : 2;
 	}
+	catch(RangeError)
+	{
+		return 0;
+	}
+}
+
+/**
+ * Funkcja ustawia informacje o błędzie
+ * 
+ * Params:
+ * errcode = kod błędu
+ * token = token, przy którym wystąpił błąd
+ * initialLength = początkowa długość wyrażenia
+ * currentLength = aktualna długość wyrażenia
+ */
+void setError(const int errcode, char[] token, size_t initialLength, size_t currentLength)
+{
+	errorCode = errcode;
+	errorToken = token.idup;
+	errorPosition = cast(int) (initialLength - (token.length + currentLength));
 }
 
 /**
@@ -182,13 +222,19 @@ char[] lparse(ref char[] src)
 		}
 	}
 	
+	// Nawias
+	else if(src[pos] == '(' || src[pos] == ')')
+	{
+		// Nic nie robimy, po prostu bierze jeden znak
+	}
+	
 	// Operator
-	else if(src[pos].isOpChar())
+	else if(!src[pos].isWhite())
 	{
 		while(pos < src.length-1)
 		{
 			pos++;
-			if(!src[pos].isOpChar())
+			if(src[0..pos].isOperator() || src[pos].isVarChar() || src[pos].isWhite())
 			{
 				pos--;  // Ten znak nie wchodzi, więc wracamy
 				break;
@@ -218,6 +264,7 @@ char[] lparse(ref char[] src)
  */
 bool validate(char[] infix)
 {
+	size_t initialLength = cast(int) infix.length;  // do obliczania pozycji błędu
 	char[] previousType = "".dup;  // operator lub "var", jeżeli zniemma
 	char[] token;
 	
@@ -238,6 +285,7 @@ bool validate(char[] infix)
 			// Zabroniony po operatorach jedno- i dwuargumentowych, nawiasie otwierającym i na początku
 			if(argumentCount(previousType) > 0 || previousType == "(" || previousType == "")
 			{
+				setError(ERRCODE_UNEXPECTED_END, token, initialLength, infix.length);
 				return false;
 			}
 			
@@ -245,16 +293,17 @@ bool validate(char[] infix)
 		}
 		
 		// Zmienna
-		else if(token[0].isVarChar)
+		else if(token[0].isVarChar())
 		{
 			/*
-			 * Jeżeli pierwszy znak jest alfanumeryczny, to pozostałe też - inaczej
+			 * Jeżeli pierwszy znak jest znakiem zmiennej, to pozostałe też - inaczej
 			 * byłyby rozdzielone przez metodę lparse.
 			 */
 			 
 			 // Zabroniona po nawiasie zamykającym i zmiennej
 			 if(previousType == ")" || previousType == "var")
 			 {
+				setError(ERRCODE_UNEXPECTED_VAR, token, initialLength, infix.length);
 				return false;
 			 }
 			 
@@ -267,6 +316,7 @@ bool validate(char[] infix)
 			// Zabroniony po operatorze jedno- lub dwuargumentowym, nawiasie otwierającym i na początku
 			if(argumentCount(previousType) > 0 || previousType == "(" || previousType == "")
 			{
+				setError(ERRCODE_UNEXPECTED_BIN_OPER, token, initialLength, infix.length);
 				return false;
 			}
 			
@@ -279,6 +329,7 @@ bool validate(char[] infix)
 			// Zabroniony po zmiennej i nawiasie zamykającym
 			if(previousType == "var" || previousType == ")")
 			{
+				setError(ERRCODE_UNEXPECTED_UN_OPER, token, initialLength, infix.length);
 				return false;
 			}
 			
@@ -293,6 +344,7 @@ bool validate(char[] infix)
 			// Zabroniony po zmiennej i nawiasie zamykającym
 			if(previousType == "var" || previousType == ")")
 			{
+				setError(ERRCODE_UNEXPECTED_LBRACK, token, initialLength, infix.length);
 				return false;
 			}
 			
@@ -304,9 +356,16 @@ bool validate(char[] infix)
 		{
 			bracketBalance--;
 			
+			if(bracketBalance < 0)
+			{
+				setError(ERRCODE_SPARE_RBRACE, token, initialLength, infix.length);
+				return false;
+			}
+			
 			// Zabroniony po operatorze jedno- lub dwuargumentowym, nawiasie otwierającym i na początku
 			if(argumentCount(previousType) > 0 || previousType == "(" || previousType == "")
 			{
+				setError(ERRCODE_UNEXPECTED_RBRACK, token, initialLength, infix.length);
 				return false;
 			}
 			
@@ -316,11 +375,109 @@ bool validate(char[] infix)
 		// Nieznany token
 		else
 		{
-				return false;
+			setError(ERRCODE_INVALID_TOKEN, token, initialLength, infix.length);
+			return false;
 		}
 	}
 	
-	return bracketBalance == 0;
+	// Balans nawiasów
+	if(bracketBalance > 0)  // Przypadek <0 rozpatrzony przy napotkanym nawiasie
+	{
+		setError(ERRCODE_BRACKET_UNCLOSED, token, initialLength, infix.length);
+		return false;
+	}
+	
+	else
+	{
+		errorCode = ERRCODE_OK;
+		return true;
+	}
+}
+
+// FUNKCJE WYWOŁYWANE Z C
+
+/**
+ * Ustawia operator
+ * 
+ * Params:
+ * operator = ciąg znaków operatora
+ * precedence = priorytet operatora
+ * unary = jeden argument (jak false, to dwa). Operatory unarne stoją z przodu argumentu
+ */
+public void setOperator_C(char* operator, int precedence, bool unary)
+{
+	core.runtime.Runtime.initialize();
+	
+	string dstr = toImpl!(string, char*)(operator);
+	setOperator(dstr, precedence, unary);
+}
+
+/**
+ * Usuwa operator z listy
+ * 
+ * Params:
+ * operator = operator do usunięcia
+ */
+extern(C) public void unsetOperator_C(char* operator)
+{
+	core.runtime.Runtime.initialize();
+	
+	string dstr = toImpl!(string, char*)(operator);
+	unsetOperator(dstr);
+}
+
+/**
+ * Dodaje standardowe operatory
+ */
+extern(C) public void resetOperators_C()
+{
+	core.runtime.Runtime.initialize();
+	
+	resetOperators();
+}
+
+/**
+ * Czyści listę operatorów
+ */
+extern(C) public void clearOperators_C()
+{
+	import core.runtime;
+	Runtime.initialize();
+	
+	clearOperators();
+}
+
+/**
+ * Zwraca kod błędu
+ * 
+ * Returns:
+ * kod błędu
+ */
+extern(C) int getErrorCode_C()
+{
+	return errorCode;
+}
+
+/**
+ * Zwraca token
+ * 
+ * Returns:
+ * token lub pusty ciąg znaków, gdy formuła nieprawidłowo się kończy lub błąd dotyczy nawiasów
+ */
+extern(C) immutable(char)* getErrorToken_C()
+{
+	return toStringz(errorToken);
+}
+
+/**
+ * Zwraca pozycję błędu
+ * 
+ * Returns:
+ * pozycja błędu lub koniec formuły, gdy formuła nieprawidłowo się kończy lub błąd dotyczy nawiasów
+ */
+extern(C) int getErrorPosition_C()
+{
+	return errorPosition;
 }
 
 /**
