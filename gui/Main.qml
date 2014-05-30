@@ -9,6 +9,7 @@ ApplicationWindow
 	height: 600;
 	visible: true;
 	
+	// Układ i podkomponeny
 	RowLayout
 	{
 		anchors.fill: parent;
@@ -20,6 +21,17 @@ ApplicationWindow
 			Layout.fillHeight: true;
 			Layout.minimumWidth: 200;
 			Layout.minimumHeight: 200;
+			tabPosition: Qt.BottomEdge;
+			
+			Tab
+			{
+				title: "Drzewo prawdy";
+			}
+			
+			Tab
+			{
+				title: "Drzewo wyrażenia";
+			}
 		}
 		
 		ColumnLayout
@@ -41,22 +53,26 @@ ApplicationWindow
 				anchors.horizontalCenter: parent.horizontalCenter;
 				ToolButton
 				{
-					text: "+";
+					iconSource: "img/add.svg";
+					tooltip: "Dodaj";
 				}
 				
 				ToolButton
 				{
-					text: "...";
+					iconSource: "img/edit.svg";
+					tooltip: "Edytuj";
 				}
 				
 				ToolButton
 				{
-					text: "-";
+					iconSource: "img/delete.svg";
+					tooltip: "Usuń";
 				}
 				
 				ToolButton
 				{
-					text: "L";
+					iconSource: "img/load.svg";
+					tooltip: "Wczytaj z pliku";
 				}
 			}
 			
@@ -77,7 +93,8 @@ ApplicationWindow
 				
 				ToolButton
 				{
-					text: "E";
+					iconSource: "img/edit.svg";
+					tooltip: "Edytuj";
 				}
 			}
 			
@@ -98,4 +115,8 @@ ApplicationWindow
 			}
 		}
 	}
+	
+	// Overlay'e dialogowe
+	FormulaOverlay {}
+	ProgressOverlay {}
 }
