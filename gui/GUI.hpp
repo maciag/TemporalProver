@@ -5,6 +5,8 @@
 #include <QQmlApplicationEngine>
 #include <QUrl>
 
+// GUI
+
 void initGUI();
 
 #endif

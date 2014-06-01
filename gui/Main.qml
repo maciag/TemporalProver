@@ -1,6 +1,6 @@
 import QtQuick 2.2
 import QtQuick.Controls 1.1
-import QtQuick.Layouts 1.1
+import QtQuick.Layouts 1.1	
 
 ApplicationWindow
 {
@@ -26,6 +26,99 @@ ApplicationWindow
 			Tab
 			{
 				title: "Drzewo prawdy";
+				
+				ScrollView
+				{
+					anchors.fill: parent;
+					
+					// TEST
+					Tree
+					{
+						id: tree;
+						root: TreeNode
+						{
+							TreeNode
+							{
+								TreeNode
+								{
+									TreeNode
+									{
+										
+										TreeNode
+										{
+											
+										}									
+										TreeNode
+										{
+											
+										}									
+									}
+									
+									
+									TreeNode
+									{
+										
+										TreeNode
+										{
+											
+										}									
+										TreeNode
+										{
+											
+										}									
+									}
+									
+								}
+								TreeNode
+								{
+									TreeNode
+									{
+										
+										TreeNode
+										{
+											
+										}									
+										TreeNode
+										{
+											
+										}									
+									}
+									TreeNode
+									{
+										
+										TreeNode
+										{
+											
+										}									
+										TreeNode
+										{
+											
+										}									
+									}
+									
+								}
+								
+							}
+							
+							TreeNode
+							{
+								TreeNode
+								{
+									TreeNode
+									{
+										
+										TreeNode
+										{
+											
+										}
+									}
+									
+								}
+								
+							}
+						}
+					}
+				}
 			}
 			
 			Tab
