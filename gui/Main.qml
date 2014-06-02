@@ -15,115 +15,67 @@ ApplicationWindow
 		anchors.fill: parent;
 		anchors.margins: spacing;
 		
-		TabView
+		ColumnLayout
 		{
-			Layout.fillWidth: true;
-			Layout.fillHeight: true;
-			Layout.minimumWidth: 200;
-			Layout.minimumHeight: 200;
-			tabPosition: Qt.BottomEdge;
-			
-			Tab
+			TabView
 			{
-				title: "Drzewo prawdy";
+				id: tabs;
 				
-				ScrollView
+				Layout.fillWidth: true;
+				Layout.fillHeight: true;
+				Layout.minimumWidth: 200;
+				Layout.minimumHeight: 200;
+				tabPosition: Qt.BottomEdge;
+				
+				Tab
 				{
-					anchors.fill: parent;
+					title: "Drzewo prawdy";
 					
-					// TEST
-					Tree
+					ScrollView
 					{
-						id: tree;
-						root: TreeNode
+						// TEMP
+						Tree
 						{
-							TreeNode
+							root: TreeNode
 							{
-								TreeNode
-								{
-									TreeNode
-									{
-										
-										TreeNode
-										{
-											
-										}									
-										TreeNode
-										{
-											
-										}									
-									}
-									
-									
-									TreeNode
-									{
-										
-										TreeNode
-										{
-											
-										}									
-										TreeNode
-										{
-											
-										}									
-									}
-									
-								}
-								TreeNode
-								{
-									TreeNode
-									{
-										
-										TreeNode
-										{
-											
-										}									
-										TreeNode
-										{
-											
-										}									
-									}
-									TreeNode
-									{
-										
-										TreeNode
-										{
-											
-										}									
-										TreeNode
-										{
-											
-										}									
-									}
-									
-								}
-								
-							}
-							
-							TreeNode
-							{
-								TreeNode
-								{
-									TreeNode
-									{
-										
-										TreeNode
-										{
-											
-										}
-									}
-									
-								}
-								
+								value: "523+123";
+								character: "+";
+								valueLabel: nodeValue;
+								TreeNode {value: "523"; character: ""; valueLabel: nodeValue;}
+								TreeNode {value: "123"; character: ""; valueLabel: nodeValue;}
 							}
 						}
+						// END TEMP
+					}
+				}
+				
+				Tab
+				{
+					title: "Drzewo wyrażenia";
+					
+					ScrollView
+					{
+						// TEMP
+						Tree
+						{
+							root: TreeNode
+							{
+								value: "X!q"; character: "X"; valueLabel: nodeValue;
+								TreeNode
+								{
+									value: "!q"; character: "!"; valueLabel: nodeValue;
+									TreeNode {value: "q"; character: ""; valueLabel: nodeValue;}
+								}
+							}
+						}
+						// END TEMP
 					}
 				}
 			}
 			
-			Tab
+			Label
 			{
-				title: "Drzewo wyrażenia";
+				id: nodeValue;
 			}
 		}
 		
@@ -205,6 +157,36 @@ ApplicationWindow
 			{
 				implicitWidth: 200;
 				text: "Rozłóż";
+			}
+			
+			RowLayout
+			{
+				anchors.horizontalCenter: parent.horizontalCenter;
+				ToolButton
+				{
+					iconSource: "img/zoomIn.svg";
+					tooltip: "Powiększ";
+					
+					onClicked:
+					{
+						var currentTree = tabs.getTab(tabs.currentIndex).children[0].children[0];
+						var newScale = currentTree.scale + 0.1;
+						currentTree.scale = newScale > 1 ? 1 : newScale;
+					}
+				}
+				
+				ToolButton
+				{
+					iconSource: "img/zoomOut.svg";
+					tooltip: "Pomniejsz";
+					
+					onClicked:
+					{
+						var currentTree = tabs.getTab(tabs.currentIndex).children[0].children[0];
+						var newScale = currentTree.scale - 0.1;
+						currentTree.scale = newScale < 0.1 ? 0.1 : newScale;
+					}
+				}
 			}
 		}
 	}

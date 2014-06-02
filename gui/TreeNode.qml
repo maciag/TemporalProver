@@ -5,7 +5,9 @@ import QtQuick.Layouts 1.1
 ColumnLayout
 {
 	default property alias contents: childContainer.children;
-	property string value;
+	property string value: "";
+	property string character: "";
+	property Label valueLabel: null;
 	
 	id: node;
 	spacing: 20;
@@ -29,8 +31,30 @@ ColumnLayout
 			anchors.fill: parent;
 			hoverEnabled: true;
 			
-			onEntered: { parent.color = "#00A0E0"; }
-			onExited: { parent.color = "#0060A0"; }
+			onEntered:
+			{
+				parent.color = "#00A0E0"
+				if(valueLabel != null)
+					valueLabel.text = value;
+				
+			}
+			
+			onExited:
+			{
+				parent.color = "#0060A0";
+				if(valueLabel != null)
+					valueLabel.text = "";
+			}
+		}
+		
+		Text
+		{
+			anchors.horizontalCenter: parent.horizontalCenter;
+			anchors.verticalCenter: parent.verticalCenter;
+			
+			color: "white";
+			font.bold: true;
+			text: character;
 		}
 	}
 	
