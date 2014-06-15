@@ -1,3 +1,6 @@
+#ifndef STRINGFORMULA_HPP_
+#define STRINGFORMULA_HPP_
+
 #include <map>
 #include <algorithm>
 #include <iterator>
@@ -9,43 +12,45 @@
 
 using namespace std;
 
-class StringFormula
-{
+class StringFormula {
 
+public:
+
+	enum decomposeType {
+		branching = 0, stacking, branching_stacking, single, none, error
+	};
+
+	StringFormula(string content);
+	StringFormula(vector<string> symbolTable);
+	~StringFormula();
+
+	string getRaw();
+	vector<token> getTokenArray();
+	vector<string> getSymbolArray();
+	bool decompose(vector<StringFormula> &elements);
+	decomposeType getType();
+
+	friend ostream& operator<<(ostream& os, const StringFormula& stringFormula);
+
+private:
 	static map<string, token> tokenMap;
 
 	string rawContent;
 	string inflixContent;
 	vector<token> tokenArray;
 	vector<string> symbolArray;
+	decomposeType type;
 
 	token parseSymbol(string symbol);
-	vector<string> splitString(const string& s, const string& delim, const bool keep_empty = true);
-	//TODO Wyznaczanie klasycznej postaci infiksowej (rawContent) na podstawie zapisu w notacji polskiej
-
-public:
-
-	enum decomposeType {
-		branching = 0,
-		stacking,
-		branching_stacking,
-		single
-	};
-
-	StringFormula(string content);
-	StringFormula(vector<string> symbolTable);
-	~StringFormula();
+	vector<string> splitString(const string& s, const string& delim,
+			const bool keep_empty = true);
+	void evalDecompositionType();
+	StringFormula subFormula(int begin, int end);
 	token getToken(int idx);
 	string getSymbol(int idx);
-	string getRaw();
-	vector<token> getTokenArray();
-	vector<string> getSymbolArray();
-	bool isBranching();
-	bool isAtomic();
 	void negate();
-	decomposeType decompose(vector<StringFormula> &elements);
-	StringFormula subFormula(int begin, int end);
-
-	friend ostream& operator<<(ostream& os, const StringFormula& stringFormula);
+	//TODO Wyznaczanie klasycznej postaci infiksowej (rawContent) na podstawie zapisu w notacji polskiej
 
 };
+
+#endif /* STRINGFORMULA_HPP_ */

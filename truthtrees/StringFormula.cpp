@@ -20,6 +20,8 @@ StringFormula::StringFormula(string content) :
 	for (int i = 0; i < symbolArray.size(); i++)
 		tokenArray.push_back(parseSymbol(symbolArray[i]));
 
+	evalDecompositionType();
+
 }
 
 StringFormula::StringFormula(vector<string> symbolArray) :
@@ -32,11 +34,82 @@ StringFormula::StringFormula(vector<string> symbolArray) :
 		inflixContent.append(symbolArray[i] + " ");
 	}
 
-	inflixContent.pop_back();
+	if (inflixContent.size() > 0)
+		inflixContent.erase(inflixContent.size() - 1);
 
 	//TODO Kontrola konsystentności stworzonej formuły
 	//TODO Wyznaczenie klasycznej postaci infiksowej
 	rawContent = string("***");
+
+	evalDecompositionType();
+
+}
+
+void StringFormula::evalDecompositionType() {
+
+	if (tokenArray.size() == 0) {
+		type = decomposeType::none;
+		return;
+	}
+
+	if (tokenArray[0] == token::tvar) {
+		type = decomposeType::none;
+		return;
+	}
+
+	if (tokenArray[0] == token::tneg && tokenArray[1] == token::tvar) {
+		type = decomposeType::none;
+		return;
+	}
+
+	switch (tokenArray[0]) {
+	case token::tneg: {
+		switch (tokenArray[1]) {
+		case token::tand:
+			type = decomposeType::branching;
+			break;
+
+		case token::tor:
+			type = decomposeType::stacking;
+			break;
+
+		case token::timp:
+			type = decomposeType::stacking;
+			break;
+
+		case token::teq:
+			type = decomposeType::branching_stacking;
+			break;
+
+		case token::tneg:
+			type = decomposeType::single;
+			break;
+
+		default:
+			type = decomposeType::none;
+		}
+		break;
+	}
+	case token::tand:
+		type = decomposeType::stacking;
+		break;
+
+	case token::tor:
+		type = decomposeType::branching;
+		break;
+
+	case token::timp:
+		type = decomposeType::branching;
+		break;
+
+	case token::teq:
+		type = decomposeType::branching_stacking;
+		break;
+
+	default:
+		type = decomposeType::none;
+
+	}
 
 }
 
@@ -103,40 +176,11 @@ vector<string> StringFormula::getSymbolArray() {
 	return symbolArray;
 }
 
-bool StringFormula::isBranching() {
-	if (tokenArray.size() < 3)
+bool StringFormula::decompose(vector<StringFormula> &elements) {
+	if (type == decomposeType::none || type == decomposeType::error)
 		return false;
 
-	if (tokenArray.front() == token::tor || tokenArray.front() == token::timp
-			|| tokenArray.front() == token::teq)
-		return true;
-
-	if (tokenArray.size() >= 4) {
-		if (tokenArray.front() == token::tneg) {
-			if (tokenArray[1] == token::tand || tokenArray[1] == token::teq)
-				return true;
-		} else
-			return false;
-	}
-
-	return false;
-}
-
-bool StringFormula::isAtomic() {
-	if (tokenArray.front() == token::tvar)
-		return true;
-	if (tokenArray[0] == token::tneg && tokenArray[1] == token::tvar)
-		return true;
-	return false;
-}
-
-StringFormula::decomposeType StringFormula::decompose(
-		vector<StringFormula> &elements) {
-	if (isAtomic())
-		throw runtime_error("Dekompozycja niemożliwa - formuła atomiczna");
-
 	elements.clear();
-
 	int idx = 0, counter = 1;
 	bool isNegated = false;
 	if (tokenArray.front() == token::tneg) {
@@ -157,12 +201,13 @@ StringFormula::decomposeType StringFormula::decompose(
 	if (isNegated) {
 		if (tokenArray[begin] == token::tneg) {
 			elements.push_back(subFormula(begin + 1, end));
-			return decomposeType::single;
+			return true;
 		}
 		begin++;
 	}
-	StringFormula first = subFormula(begin, end), second = subFormula(end,
-			symbolArray.size());
+
+	StringFormula first = subFormula(begin, end);
+	StringFormula second = subFormula(end, symbolArray.size());
 
 	switch (tokenArray.front()) {
 	case token::tneg:
@@ -173,7 +218,7 @@ StringFormula::decomposeType StringFormula::decompose(
 			second.negate();
 			elements.push_back(first);
 			elements.push_back(second);
-			return decomposeType::branching;
+			return true;
 			break;
 
 		case token::tor:
@@ -181,17 +226,17 @@ StringFormula::decomposeType StringFormula::decompose(
 			second.negate();
 			elements.push_back(first);
 			elements.push_back(second);
-			return decomposeType::stacking;
+			return true;
 			break;
 
 		case token::timp:
 			second.negate();
 			elements.push_back(first);
 			elements.push_back(second);
-			return decomposeType::stacking;
+			return true;
 			break;
 
-		case token::teq:
+		case token::teq: {
 			StringFormula negFirst = first, negSecond = second;
 			negFirst.negate();
 			negSecond.negate();
@@ -199,31 +244,32 @@ StringFormula::decomposeType StringFormula::decompose(
 			elements.push_back(negSecond);
 			elements.push_back(negFirst);
 			elements.push_back(second);
-			return decomposeType::branching_stacking;
+			return true;
 			break;
+		}
 		}
 		break;
 
 	case token::tand:
 		elements.push_back(first);
 		elements.push_back(second);
-		return decomposeType::stacking;
+		return true;
 		break;
 
 	case token::tor:
 		elements.push_back(first);
 		elements.push_back(second);
-		return decomposeType::branching;
+		return true;
 		break;
 
 	case token::timp:
 		first.negate();
 		elements.push_back(first);
 		elements.push_back(second);
-		return decomposeType::branching;
+		return true;
 		break;
 
-	case token::teq:
+	case token::teq: {
 		StringFormula negFirst = first, negSecond = second;
 		negFirst.negate();
 		negSecond.negate();
@@ -231,10 +277,16 @@ StringFormula::decomposeType StringFormula::decompose(
 		elements.push_back(second);
 		elements.push_back(negFirst);
 		elements.push_back(negSecond);
-		return decomposeType::branching;
+		return true;
 		break;
+	}
+
+	default:
+		return false;
 
 	}
+
+	return false;
 
 }
 
@@ -242,6 +294,7 @@ void StringFormula::negate() {
 	symbolArray.insert(symbolArray.begin(), "!");
 	tokenArray.insert(tokenArray.begin(), token::tneg);
 	inflixContent.insert(0, string("! "));
+	evalDecompositionType();
 //TODO Konwersja postaci surowej notacji infiksowej (rawContent)
 
 }
@@ -259,7 +312,7 @@ StringFormula StringFormula::subFormula(int begin, int end) {
 
 ostream& operator<<(ostream& os, const StringFormula& stringFormula) {
 
-	os << stringFormula.rawContent << "   " << stringFormula.inflixContent
+	/*os << stringFormula.rawContent << "   " << stringFormula.inflixContent
 			<< "  ";
 	for (int i = 0; i < stringFormula.tokenArray.size(); i++) {
 		switch (stringFormula.tokenArray[i]) {
@@ -286,5 +339,12 @@ ostream& operator<<(ostream& os, const StringFormula& stringFormula) {
 			break;
 		}
 	}
+	*/
+	os << stringFormula.inflixContent;
+
 	return os;
+}
+
+StringFormula::decomposeType StringFormula::getType() {
+	return type;
 }

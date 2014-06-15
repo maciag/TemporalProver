@@ -1,3 +1,6 @@
+#ifndef LEXICALTABLE_HPP_
+#define LEXICALTABLE_HPP_
+
 enum token {
 
 	tvar = 0,
@@ -10,3 +13,4 @@ enum token {
 
 };
 
+#endif /* LEXICALTABLE_HPP_ */
