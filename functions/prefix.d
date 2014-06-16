@@ -52,9 +52,13 @@ void push(ref char[] stack, char[] word)
 }
 
 /**
- * Funkcja budująca wyrażenie dla operatora i stosu
+ * Funkcja budująca wyrażenie prefiksowe dla operatora i stosu
+ * 
+ * Params:
+ * stack = Stos w stringu
+ * operator = Operator
  */
-void buildExpression(ref char[] stack, char[] operator)
+void buildPrefixExpression(ref char[] stack, char[] operator)
 {
 	int argc = operator.argumentCount();
 	char[][] args;
@@ -73,6 +77,63 @@ void buildExpression(ref char[] stack, char[] operator)
 	}
 	
 	stack.push(res);
+}
+
+/**
+ * Funkcja budująca wyrażenie infiksowe dla operatora i stosu
+ * 
+ * Funkcja każdemu wyrażeniu na stosie przyporządkowuje główny operator
+ * tego wyrażenia. Podczas składania sprawdzane są główne operatory
+ * argumentów i te, które mają niższy priorytet od operatora będącego
+ * argumentem tej metody, są ujmowane w nawiasy. Dzięki temu
+ * nie są wstawiane zbędne nawiasy.
+ * 
+ * Params:
+ * stack = Stos w stringu
+ * operator = Operator
+ */
+void buildInfixExpression(ref char[] stack, char[] operator)
+{
+	int argc = operator.argumentCount();
+	char[][] args;
+	args.length = argc;
+	
+	for(int i = argc-1; i>=0; i--)
+	{
+		args[i] = stack.pop();
+	}
+	
+	char[] res;
+	
+	if(argc == 1)
+	{
+		char[][] arg0 = args[0].split("\n");  // Wypakowujemy operator
+		
+		if(operator.hasNotLowerPrecedence(arg0[1]))
+			res = operator ~ "(" ~ arg0[0].strip() ~ ")";
+		else
+			res = operator ~ arg0[0].strip();
+	}
+	
+	else if(argc == 2)
+	{
+		char[][] arg0 = args[0].split("\n");  // Wypakowujemy operatory
+		char[][] arg1 = args[1].split("\n");
+		
+		if(operator.hasNotLowerPrecedence(arg1[1]))
+			res = "(" ~ arg1[0].strip() ~ ") ";
+		else
+			res = arg1[0].strip() ~ " ";
+		
+		res ~= operator;
+		
+		if(operator.hasNotLowerPrecedence(arg0[1]))
+			res ~= " (" ~ arg0[0].strip() ~ ") ";
+		else
+			res ~= " " ~ arg0[0].strip();
+	}
+	
+	stack.push(res ~ "\n" ~ operator);  // Zapisujemy z operatorem
 }
 
 /**
@@ -118,7 +179,7 @@ char[] toPrefix(char[] infix)
 			
 			while(popped != "(")
 			{
-				buildExpression(operandStack, popped);
+				buildPrefixExpression(operandStack, popped);
 				popped = operatorStack.pop();
 			}
 		}
@@ -130,7 +191,7 @@ char[] toPrefix(char[] infix)
 			while(popped.hasNotLowerPrecedence(word))
 			{
 				// Zdejmowanie odpowiedniej ilości argumentów dla operatora i odłożenie wyrażenia
-				buildExpression(operandStack, popped);
+				buildPrefixExpression(operandStack, popped);
 				popped = operatorStack.pop();
 			}
 			
@@ -148,21 +209,39 @@ char[] toPrefix(char[] infix)
 }
 
 /**
- * Funkcja konwertująca formułę do postaci prefiksowej - funkcja do wywołania z języka C/C++
+ * Funkcja konwertująca formułę do postaci infiksowej
+ * 
+ * Do wyrażeń na stosie dopisywana jest druga linia z głównym operatorem
+ * (lub pusta dla zmiennych) - potrzebne przy ustalaniu wymaganych nawiasów.
  *
  * Params:
- * infix = Formuła w notacji infiksowej
+ * prefix = Formuła w notacji infiksowej
  * 
  * Returns:
- * Formuła w notacji prefiksowej
+ * Formuła w notacji infiksowej
  */
-extern(C) immutable(char)* toPrefix_C(char* infix)
+char[] toInfix(char[] prefix)
 {
-	import core.runtime;
-	Runtime.initialize();
+	/*
+	 * Tworzenie tablic dynamicznych.
+	 * - Używamy atrybutu scope, by zaalokować zmienne na stosie i usunąć je po wyjściu z funkcji
+	 * - Zmienna res nie jest alokowana na stosie, ponieważ zostanie zwrócona z funkcji
+	 */
+	scope char[] stack;
 	
-	char[] dstr = toImpl!(string, char*)(infix);
-	dstr = toPrefix(dstr);
+	char[] word;
+	while((word = rparse(prefix)) != "")
+	{
+		if(word.isOperator())
+		{
+			buildInfixExpression(stack, word);
+		}
+		
+		else
+		{
+			stack.push(word ~ "\n");  // Dopisujemy pustą linię
+		}
+	}
 	
-	return toStringz(dstr);
+	return stack.split("\n")[0];
 }

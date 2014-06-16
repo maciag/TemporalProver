@@ -15,7 +15,7 @@ obj/GUI.o : gui/GUI.cpp gui/GUI.hpp
 	cd gui; qmake && make; cd ..
 	
 lib/functions.a: functions/prefix.d functions/lexical.d
-	dmd -lib functions/prefix.d functions/lexical.d -oflib/functions.a
+	dmd -lib functions/*.d -oflib/functions.a
 	
 clean:
 	rm obj/*

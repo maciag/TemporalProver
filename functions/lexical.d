@@ -182,9 +182,9 @@ void setError(const int errcode, char[] token, size_t initialLength, size_t curr
 }
 
 /**
- * Funkcja pobierająca pierwsze słowo formuły z prawej lewej. Słowo to jest
- * odcięte ze źródłowego ciągu znaków. Białe znaki są pomijane, ale zawsze
- * dzielą słowa.
+ * Funkcja pobierająca pierwsze słowo formuły z lewej lub prawej strony.
+ * Słowo to jest odcięte ze źródłowego ciągu znaków. Białe znaki są pomijane,
+ * ale zawsze dzielą słowa.
  * 
  * Możliwe słowa:
  * - ciąg znaków alfanumerycznych - zmienna
@@ -193,30 +193,33 @@ void setError(const int errcode, char[] token, size_t initialLength, size_t curr
  * 
  * Params
  * src = wejściowy ciąg znaków. Przekazanie przez referencję.
+ * right = jeśli true, zwrócone zostanie słowo z prawej strony. Jeśli false - z lewej
  * 
  * Returns:
  * Słowo
  */
-char[] lparse(ref char[] src)
+char[] parse(ref char[] src, bool right)
 {
 	if(src.length == 0)
 		return "".dup;
 	
-	int pos = 0;
+	int pos = right ? cast(int) src.length-1 : 0;
 	
 	// Obcinamy białe znaki
-	while(src[pos].isWhite() && pos < src.length-1)
-		pos++;
+	while(src[pos].isWhite() && (right ? (pos > 0) : (pos < src.length-1)))
+		right ? pos-- : pos++;
+	
+	int whiteCutPos = pos;
 	
 	// Nazwa zmiennej
 	if(src[pos].isVarChar())
 	{
-		while(pos < src.length-1)
+		while(right ? (pos > 0) : (pos < src.length-1))
 		{
-			pos++;
+			right ? pos-- : pos++;
 			if(!src[pos].isVarChar())
 			{
-				pos--;  // Ten znak nie wchodzi, więc wracamy
+				right ? pos++ : pos--;  // Ten znak nie wchodzi, więc wracamy
 				break;
 			}
 		}
@@ -231,12 +234,15 @@ char[] lparse(ref char[] src)
 	// Operator
 	else if(!src[pos].isWhite())
 	{
-		while(pos < src.length-1)
+		while(right ? (pos > 0) : (pos < src.length-1))
 		{
-			pos++;
-			if(src[0..pos].isOperator() || src[pos].isVarChar() || src[pos].isWhite())
+			right ? pos-- : pos++;
+			
+			char[] current = right ? src[pos..whiteCutPos] : src[whiteCutPos..pos];
+			
+			if(current.isOperator() || src[pos].isVarChar() || src[pos].isWhite())
 			{
-				pos--;  // Ten znak nie wchodzi, więc wracamy
+				right ? pos++ : pos--;  // Ten znak nie wchodzi, więc wracamy
 				break;
 			}
 		}
@@ -247,10 +253,38 @@ char[] lparse(ref char[] src)
 	 * więc nic więcej nie trzeba robić. Tak więc po prostu zwracamy wartość
 	 * od indeksu pos do końca i obcinamy białe znaki
 	 */
-	char[] word = src[0..pos+1].stripLeft();
-	src = src[pos+1..$];  // Realokacja, ale chyba nie da się jej uniknąć
+	char[] word = right ? src[pos..$].stripRight() : src[0..pos+1].stripLeft();
+	src = right ? src[0..pos] : src[pos+1..$];  // Realokacja, ale chyba nie da się jej uniknąć
 	
 	return word;
+}
+
+/**
+ * Funkcja pobierająca słowo z lewej strony. Wywołuje parse(src, false).
+ * 
+ * Params
+ * src = wejściowy ciąg znaków. Przekazanie przez referencję.
+ * 
+ * Returns:
+ * Słowo
+ */
+char[] lparse(ref char[] src)
+{
+	return parse(src, false);
+}
+
+/**
+ * Funkcja pobierająca słowo z prawej strony. Wywołuje parse(src, true).
+ * 
+ * Params
+ * src = wejściowy ciąg znaków. Przekazanie przez referencję.
+ * 
+ * Returns:
+ * Słowo
+ */
+char[] rparse(ref char[] src)
+{
+	return parse(src, true);
 }
 
 /**
@@ -392,108 +426,4 @@ bool validate(char[] infix)
 		errorCode = ERRCODE_OK;
 		return true;
 	}
-}
-
-// FUNKCJE WYWOŁYWANE Z C
-
-/**
- * Ustawia operator
- * 
- * Params:
- * operator = ciąg znaków operatora
- * precedence = priorytet operatora
- * unary = jeden argument (jak false, to dwa). Operatory unarne stoją z przodu argumentu
- */
-public void setOperator_C(char* operator, int precedence, bool unary)
-{
-	core.runtime.Runtime.initialize();
-	
-	string dstr = toImpl!(string, char*)(operator);
-	setOperator(dstr, precedence, unary);
-}
-
-/**
- * Usuwa operator z listy
- * 
- * Params:
- * operator = operator do usunięcia
- */
-extern(C) public void unsetOperator_C(char* operator)
-{
-	core.runtime.Runtime.initialize();
-	
-	string dstr = toImpl!(string, char*)(operator);
-	unsetOperator(dstr);
-}
-
-/**
- * Dodaje standardowe operatory
- */
-extern(C) public void resetOperators_C()
-{
-	core.runtime.Runtime.initialize();
-	
-	resetOperators();
-}
-
-/**
- * Czyści listę operatorów
- */
-extern(C) public void clearOperators_C()
-{
-	import core.runtime;
-	Runtime.initialize();
-	
-	clearOperators();
-}
-
-/**
- * Zwraca kod błędu
- * 
- * Returns:
- * kod błędu
- */
-extern(C) int getErrorCode_C()
-{
-	return errorCode;
-}
-
-/**
- * Zwraca token
- * 
- * Returns:
- * token lub pusty ciąg znaków, gdy formuła nieprawidłowo się kończy lub błąd dotyczy nawiasów
- */
-extern(C) immutable(char)* getErrorToken_C()
-{
-	return toStringz(errorToken);
-}
-
-/**
- * Zwraca pozycję błędu
- * 
- * Returns:
- * pozycja błędu lub koniec formuły, gdy formuła nieprawidłowo się kończy lub błąd dotyczy nawiasów
- */
-extern(C) int getErrorPosition_C()
-{
-	return errorPosition;
-}
-
-/**
- * Funkcja walidująca postać infiksową - funkcja do wywołania z języka C/C++
- *
- * Params:
- * infix = Formuła w notacji infiksowej
- * 
- * Returns:
- * true, jeżeli formuła jest poprawna
- */
-extern(C) bool validate_C(char* infix)
-{
-	import core.runtime;
-	Runtime.initialize();
-	
-	char[] dstr = toImpl!(string, char*)(infix);
-	return validate(dstr);
 }
