@@ -17,6 +17,7 @@ public:
 	void appendFormula(string rawFormula);
 	void appendFormula(StringFormula formula);
 	bool isAllChecked();
+	string toFormattedString();
 
 	StringFormula::decomposeType decomposeNext(vector<FormulaNode> &childNodes);
 	friend ostream& operator<<(ostream& os, const FormulaNode& formulaNode);

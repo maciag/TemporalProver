@@ -32,6 +32,9 @@ public:
 
 	friend ostream& operator<<(ostream& os, const StringFormula& stringFormula);
 
+	static vector<string> splitString(const string& s, const string& delim,
+				const bool keep_empty = true);
+
 private:
 	static map<string, token> tokenMap;
 
@@ -42,8 +45,6 @@ private:
 	decomposeType type;
 
 	token parseSymbol(string symbol);
-	vector<string> splitString(const string& s, const string& delim,
-			const bool keep_empty = true);
 	void evalDecompositionType();
 	StringFormula subFormula(int begin, int end);
 	token getToken(int idx);

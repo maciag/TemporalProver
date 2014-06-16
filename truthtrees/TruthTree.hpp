@@ -22,6 +22,8 @@ public:
 	void decomposeAll();
 	bool decomposeStep();
 
+	string toFormattedString();
+
 	friend ostream& operator<<(ostream& os, const TruthTree& truthTree);
 
 };

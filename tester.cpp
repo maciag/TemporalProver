@@ -16,50 +16,57 @@ int main() {
 	string line;
 	getline(cin, line);
 
-	StringFormula *form; // UWAGA, WSKAŹNIK!!! Musiałem, żeby przechwycić wyjątek i wypisać błąd.
+	vector<string> subformulas = StringFormula::splitString(line, ";");
+	FormulaNode root;
 
-	try {
-		form = new StringFormula(line);
-	} catch (runtime_error) {
-		int errCode = getErrorCode_C();
-		string token = getErrorToken_C();
-		int errPos = getErrorPosition_C();
+	for (int i = 0; i < subformulas.size(); i++) {
+		try {
+			StringFormula *form; // UWAGA, WSKAŹNIK!!! Musiałem, żeby przechwycić wyjątek i wypisać błąd.
+			form = new StringFormula(subformulas[i]);
+			root.appendFormula(*form);
+			delete form;
+		} catch (runtime_error &) {
+			int errCode = getErrorCode_C();
+			string token = getErrorToken_C();
+			int errPos = getErrorPosition_C();
 
-		cout << errPos << ": ";
+			cout << errPos << ": ";
 
-		// Switch nie może być, bo wartości nie są wyrażeniem stałym
-		if (errCode == ERRCODE_UNEXPECTED_END)
-			cout << "Nieoczekiwany koniec formuły" << endl;
+			// Switch nie może być, bo wartości nie są wyrażeniem stałym
+			if (errCode == ERRCODE_UNEXPECTED_END)
+				cout << "Nieoczekiwany koniec formuły" << endl;
 
-		else if (errCode == ERRCODE_UNEXPECTED_VAR)
-			cout << "Nieoczekiwana zmienna '" << token << "'" << endl;
+			else if (errCode == ERRCODE_UNEXPECTED_VAR)
+				cout << "Nieoczekiwana zmienna '" << token << "'" << endl;
 
-		else if (errCode == ERRCODE_UNEXPECTED_BIN_OPER)
-			cout << "Nieoczekiwany operator binarny '" << token << "'" << endl;
+			else if (errCode == ERRCODE_UNEXPECTED_BIN_OPER)
+				cout << "Nieoczekiwany operator binarny '" << token << "'"
+						<< endl;
 
-		else if (errCode == ERRCODE_UNEXPECTED_UN_OPER)
-			cout << "Nieoczekiwany operator unarny '" << token << "'" << endl;
+			else if (errCode == ERRCODE_UNEXPECTED_UN_OPER)
+				cout << "Nieoczekiwany operator unarny '" << token << "'"
+						<< endl;
 
-		else if (errCode == ERRCODE_UNEXPECTED_LBRACK)
-			cout << "Nieoczekiwany nawias '('" << endl;
+			else if (errCode == ERRCODE_UNEXPECTED_LBRACK)
+				cout << "Nieoczekiwany nawias '('" << endl;
 
-		else if (errCode == ERRCODE_UNEXPECTED_RBRACK)
-			cout << "Nieoczekiwany nawias ')'" << endl;
+			else if (errCode == ERRCODE_UNEXPECTED_RBRACK)
+				cout << "Nieoczekiwany nawias ')'" << endl;
 
-		else if (errCode == ERRCODE_INVALID_TOKEN)
-			cout << "Nieznany token: '" << token << "'" << endl;
+			else if (errCode == ERRCODE_INVALID_TOKEN)
+				cout << "Nieznany token: '" << token << "'" << endl;
 
-		else if (errCode == ERRCODE_BRACKET_UNCLOSED)
-			cout << "Brakuje nawiasu zamykającego" << endl;
+			else if (errCode == ERRCODE_BRACKET_UNCLOSED)
+				cout << "Brakuje nawiasu zamykającego" << endl;
 
-		else if (errCode == ERRCODE_SPARE_RBRACE)
-			cout << "Nieoczekiwany nawias zamykający" << endl;
+			else if (errCode == ERRCODE_SPARE_RBRACE)
+				cout << "Nieoczekiwany nawias zamykający" << endl;
 
-		return 0;
+			return 0;
+		}
 	}
-	StringFormula formula = *form;
 
-	TruthTree truthTree(formula);
+	TruthTree truthTree(root);
 	int idx = 0;
 	do {
 		cout << idx << endl;
@@ -67,6 +74,10 @@ int main() {
 		cout << endl;
 		idx++;
 	} while (truthTree.decomposeStep());
+
+	string stringForm = truthTree.toFormattedString();
+
+	cout << endl << "W postaci sformatowanego stringa" << endl << stringForm << endl;
 
 	return 0;
 }
