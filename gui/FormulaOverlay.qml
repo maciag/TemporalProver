@@ -19,12 +19,28 @@ Overlay
 	{
 		iconSource: "img/confirm.svg";
 		tooltip: "OK";
-		onClicked: {  }
+		onClicked:
+		{
+			var validate = false;  // TODO
+			
+			if(validate)
+			{
+				save(formulaArea.text);
+				formulaOverlay.visible = false;
+			}
+			
+			else
+			{
+				toast.visible = true;
+				toast.text = "Walidacja do zrobienia!";
+			}
+		}
 	}
 	]
 	
 	TextArea
 	{
+		id: formulaArea;
 		anchors.fill: parent;
 	}
 	
@@ -33,4 +49,16 @@ Overlay
 		id: toast;
 		width: 250;
 	}
+	
+	function getFormula()
+	{
+		return formulaArea.text();
+	}
+	
+	function setText(text)
+	{
+		formulaArea.text = text;
+	}
+	
+	signal save(string formula);
 }

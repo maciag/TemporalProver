@@ -6,7 +6,7 @@ Rectangle
 {
 	id: toast;
 	width: 150;
-	height: 36;
+	height: 28;
 	color: "#404040";
 	radius: 5;
 	visible: false;
@@ -22,6 +22,7 @@ Rectangle
 		anchors.left: parent.left;
 		anchors.verticalCenter: parent.verticalCenter;
 		anchors.margins: 2;
+		anchors.leftMargin: 6;
 		width: 200;
 		
 		color: "white";
@@ -35,6 +36,9 @@ Rectangle
 		anchors.right: parent.right;
 		anchors.verticalCenter: parent.verticalCenter;
 		anchors.margins: 2;
+		
+		width: 20;
+		height: 20;
 		
 		iconSource: "img/close.svg";
 		tooltip: "Zamknij";

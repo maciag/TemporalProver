@@ -6,6 +6,7 @@ Item
 {
 	id: tree;
 	property TreeNode root;
+	property int margin: 20;
 	
 	width: root == null ? 0 : scale * root.width;
 	height: root == null ? 0 : scale * root.height;
@@ -34,8 +35,8 @@ Item
 			
 			for(var i = 0; i < points.length; i += 2)
 			{
-				context.moveTo(points[i].x, points[i].y);
-				context.lineTo(points[i+1].x, points[i+1].y);
+				context.moveTo(margin+points[i].x, margin+points[i].y);
+				context.lineTo(margin+points[i+1].x, margin+points[i+1].y);
 				context.stroke();
 			}
 		}
@@ -54,6 +55,12 @@ Item
 		var coords = mapFromItem(rootCircle, rootCircle.x, rootCircle.y);
 		
 		addLines(root, width/(2*scale), 10);
+		
+		width = width+2*margin;
+		height = height+2*margin;
+		
+		root.x = margin;
+		root.y = margin;
 	}
 	
 	// Dodaje linie łączące węzeł z jego dziećmi

@@ -90,7 +90,18 @@ ApplicationWindow
 			
 			TableView
 			{
+				id: predList;
+				headerVisible: false;
+				alternatingRowColors: false;
+				selectionMode: SelectionMode.SingleSelection;
 				Layout.minimumHeight: 100;
+				model: ListModel {}
+				
+				TableViewColumn
+				{
+					role: "value";
+					title: "";
+				}
 			}
 			
 			RowLayout
@@ -100,18 +111,41 @@ ApplicationWindow
 				{
 					iconSource: "img/add.svg";
 					tooltip: "Dodaj";
+					
+					onClicked:
+					{
+						formulaOverlay.setText("");
+						formulaOverlay.visible = true;
+						formulaOverlay.save.connect(appendPred);
+					}
 				}
 				
 				ToolButton
 				{
 					iconSource: "img/edit.svg";
 					tooltip: "Edytuj";
+					
+					onClicked:
+					{
+						if(predList.currentRow >= 0)
+						{
+							formulaOverlay.setText(predList.model.get(predList.currentRow).value);
+							formulaOverlay.visible = true;
+							formulaOverlay.save.connect(updatePred);
+						}
+					}
 				}
 				
 				ToolButton
 				{
 					iconSource: "img/delete.svg";
 					tooltip: "Usuń";
+					
+					onClicked:
+					{
+						if(predList.currentRow >= 0)
+							predList.model.remove(predList.currentRow);
+					}
 				}
 				
 				ToolButton
@@ -192,6 +226,19 @@ ApplicationWindow
 	}
 	
 	// Overlay'e dialogowe
-	FormulaOverlay {}
-	ProgressOverlay {}
+	FormulaOverlay { id: formulaOverlay; }
+	ProgressOverlay { id: progressOverlay; }
+	
+	// Funkcje
+	function appendPred(formula)
+	{
+		predList.model.append({value: formula});
+		formulaOverlay.save.disconnect(appendPred);  // Odłączamy od razu sygnał
+	}
+	
+	function updatePred(formula)
+	{
+		predList.model.set(predList.currentRow, {value: formula});
+		formulaOverlay.save.disconnect(updatePred);  // Odłączamy od razu sygnał
+	}
 }
