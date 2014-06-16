@@ -165,7 +165,7 @@ string StringFormula::getSymbol(int idx) {
 }
 
 string StringFormula::getRaw() {
-	return rawContent;
+	return inflixContent;
 }
 
 vector<token> StringFormula::getTokenArray() {

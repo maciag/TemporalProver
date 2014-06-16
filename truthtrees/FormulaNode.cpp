@@ -111,6 +111,14 @@ bool FormulaNode::isAllChecked() {
 	return allChecked;
 }
 
+string FormulaNode::toFormattedString() {
+	string formattedString;
+	for (int i = 0; i < formulas.size(); i++) {
+		formattedString.append(formulas[i].getRaw() + "; ");
+	}
+	return formattedString;
+}
+
 ostream& operator<<(ostream& os, const FormulaNode& formulaNode) {
 
 	for (int i = 0; i < formulaNode.formulas.size(); i++) {

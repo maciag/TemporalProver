@@ -3,7 +3,9 @@
 TruthTree::TruthTree(string formula) {
 
 	root = mainTree.insert(mainTree.begin(), FormulaNode());
-	root->appendFormula(formula);
+	vector<string> subformulas = StringFormula::splitString(formula, ";");
+	for (int i = 0; i < subformulas.size(); i++)
+		root->appendFormula(subformulas[i]);
 	currentNode = root;
 
 }
@@ -77,6 +79,16 @@ bool TruthTree::decomposeStep() {
 	}
 	return false;
 
+}
+
+string TruthTree::toFormattedString() {
+	tree<FormulaNode>::iterator it = mainTree.begin();
+	string formattedString;
+	while (it != mainTree.end()) {
+		formattedString.append((*it).toFormattedString()+"\n");
+		++it;
+	}
+	return formattedString;
 }
 
 ostream& operator<<(ostream& os, const TruthTree& truthTree) {
