@@ -30,45 +30,28 @@ ApplicationWindow
 				Tab
 				{
 					title: "Drzewo prawdy";
+					id: truthTreeTab;
 					
 					ScrollView
 					{
-						// TEMP
 						Tree
 						{
-							root: TreeNode
-							{
-								value: "523+123";
-								character: "+";
-								valueLabel: nodeValue;
-								TreeNode {value: "523"; character: ""; valueLabel: nodeValue;}
-								TreeNode {value: "123"; character: ""; valueLabel: nodeValue;}
-							}
+							root: null;
 						}
-						// END TEMP
 					}
 				}
 				
 				Tab
 				{
 					title: "Drzewo wyrażenia";
+					id: expressionTreeTab;
 					
 					ScrollView
 					{
-						// TEMP
 						Tree
 						{
-							root: TreeNode
-							{
-								value: "X!q"; character: "X"; valueLabel: nodeValue;
-								TreeNode
-								{
-									value: "!q"; character: "!"; valueLabel: nodeValue;
-									TreeNode {value: "q"; character: ""; valueLabel: nodeValue;}
-								}
-							}
+							root: null;
 						}
-						// END TEMP
 					}
 				}
 			}
@@ -101,6 +84,12 @@ ApplicationWindow
 				{
 					role: "value";
 					title: "";
+				}
+				
+				onActivated:
+				{
+					tabs.currentIndex = 1;
+					generateExpressionTree(model.get(currentRow).value);
 				}
 			}
 			
@@ -225,11 +214,18 @@ ApplicationWindow
 		}
 	}
 	
+	// Przy onCompleted przełączamy zakładki, żeby oba scrolle były nie-undefined
+	Component.onCompleted:
+	{
+		tabs.currentIndex = 1;
+		tabs.currentIndex = 0;
+	}
+	
 	// Overlay'e dialogowe
 	FormulaOverlay { id: formulaOverlay; }
 	ProgressOverlay { id: progressOverlay; }
 	
-	// Funkcje
+	// Funkcje dotyczące predykatów
 	function appendPred(formula)
 	{
 		predList.model.append({value: formula});
@@ -239,6 +235,68 @@ ApplicationWindow
 	function updatePred(formula)
 	{
 		predList.model.set(predList.currentRow, {value: formula});
+		generateExpressionTree(formula);
 		formulaOverlay.save.disconnect(updatePred);  // Odłączamy od razu sygnał
+	}
+	
+	QtObject  // Wewnętrzne własności
+	{
+		id: treeGen;
+		property variant tokens;
+		property int index;
+		
+		property variant treeNodeComponent: Qt.createComponent("TreeNode.qml");
+	}
+	
+	// Funkcje dotyczące drzew
+	function generateExpressionTree(formula)
+	{
+		var prefix = cppBridge.toPrefix(formula);
+		treeGen.tokens = prefix.split(" ");
+		treeGen.index = 0;
+		
+		var tree = expressionTreeTab.children[0].contentItem;
+		
+		if(tree.root != null)
+		{
+			tree.root.destroy();
+			tree.canvas.destroy();
+			tree.root = null;
+			tree.canvas = null;
+		}
+		
+		tree.root = generateExpressionTreeNode();
+		tree.updateTree();
+	}
+	
+	function generateExpressionTreeNode()
+	{
+		var node = treeGen.treeNodeComponent.createObject();
+		var nodeToken = treeGen.tokens[treeGen.index]
+		
+		// Określanie ilości elementów do zapisu infiksowego
+		var prefix = nodeToken + " ";
+		var argBalance = cppBridge.getOperatorArgCount(nodeToken);
+		var i = treeGen.index+1;
+		
+		while(argBalance > 0)
+		{
+			prefix += treeGen.tokens[i] + " ";
+			argBalance += cppBridge.getOperatorArgCount(treeGen.tokens[i]) - 1;
+			i++;
+		}
+		
+		// Dodawanie dzieci
+		for(var i = 0; i < cppBridge.getOperatorArgCount(nodeToken); i++)
+		{
+			treeGen.index++;
+			var child = generateExpressionTreeNode();
+			child.parent = node.childContainer;
+		}
+		
+		node.character = nodeToken.length > 1 ? "..." : nodeToken;
+		node.value = cppBridge.toInfix(prefix);
+		node.valueLabel = nodeValue;
+		return node;
 	}
 }

@@ -13,7 +13,7 @@ extern(C) const int ERRCODE_UNEXPECTED_LBRACK = 5;
 extern(C) const int ERRCODE_UNEXPECTED_RBRACK = 6;
 extern(C) const int ERRCODE_INVALID_TOKEN = 7;
 extern(C) const int ERRCODE_BRACKET_UNCLOSED = 8;
-extern(C) const int ERRCODE_SPARE_RBRACE = 9;
+extern(C) const int ERRCODE_SPARE_RBRACK = 9;
 
 /// Informacje o błędzie - kod, początek i koniec
 int errorCode;
@@ -80,6 +80,24 @@ public void resetOperators()
 public void clearOperators()
 {
 	operators.clear();
+}
+
+/**
+ * Zwraca liczbę argumentów operatora
+ * 
+ * Returns:
+ * liczba argumentów lub 0, gdy operator jest zmienną lub nie istnieje
+ */
+public int getOperatorArgCount(string operator)
+{
+	try
+	{
+		return operators[operator].unary ? 1 : 2;
+	}
+	catch(RangeError)
+	{
+		return 0;
+	}
 }
 
 /**
@@ -392,7 +410,7 @@ bool validate(char[] infix)
 			
 			if(bracketBalance < 0)
 			{
-				setError(ERRCODE_SPARE_RBRACE, token, initialLength, infix.length);
+				setError(ERRCODE_SPARE_RBRACK, token, initialLength, infix.length);
 				return false;
 			}
 			

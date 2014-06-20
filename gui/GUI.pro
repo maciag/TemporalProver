@@ -10,5 +10,5 @@ MOC_DIR = ../moc
 QT += qml quick widgets
 
 # Input
-HEADERS += GUI.hpp
+HEADERS += GUI.hpp ../functions/prefix.h
 SOURCES += GUI.cpp

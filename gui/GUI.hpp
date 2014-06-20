@@ -2,11 +2,54 @@
 #define GUI_HPP
 
 #include <QApplication>
+#include <QObject>
+#include <QQmlContext>
 #include <QQmlApplicationEngine>
+#include <QtQml>
 #include <QUrl>
 
-// GUI
+#include <../functions/prefix.h>
 
+/**
+ * Klasa służąca do wywoływania metod C++ z poziomu QML.
+ */
+class QmlBridge : public QObject
+{
+	Q_OBJECT
+	
+	public:
+	enum ErrorCode
+	{
+		OK,
+		UnexpectedEnd,
+		UnexpectedVar,
+		UnexpectedBinOper,
+		UnexpectedUnOper,
+		UnexpectedLeftBracket,
+		UnexpectedRightBracket,
+		InvalidToken,
+		BracketUnclosed,
+		SpareRightBracket,
+		UnknownError  // Dla "else", gdyby był niepoprawny kod błędu. Nie powinno wystąpić.
+	}
+	Q_ENUMS(ErrorCode);
+	
+	static void declareQML()
+	{
+		qmlRegisterType<QmlBridge>("CppBridge", 1, 0, "ErrorCode");
+	}
+	
+	Q_INVOKABLE bool validate(QString formula);
+	Q_INVOKABLE QString toPrefix(QString formula);
+	Q_INVOKABLE QString toInfix(QString formula);
+	Q_INVOKABLE int getOperatorArgCount(QString formula);
+	
+	Q_INVOKABLE ErrorCode getErrorCode();
+	Q_INVOKABLE QString getErrorToken();
+	Q_INVOKABLE int getErrorPosition();
+};
+
+// GUI
 void initGUI();
 
 #endif

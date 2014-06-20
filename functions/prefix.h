@@ -10,12 +10,13 @@ extern "C" const int ERRCODE_UNEXPECTED_LBRACK;
 extern "C" const int ERRCODE_UNEXPECTED_RBRACK;
 extern "C" const int ERRCODE_INVALID_TOKEN;
 extern "C" const int ERRCODE_BRACKET_UNCLOSED;
-extern "C" const int ERRCODE_SPARE_RBRACE;
+extern "C" const int ERRCODE_SPARE_RBRACK;
 
 extern "C" void setOpeator_C(char *op, int precedence, bool unary);
 extern "C" void unsetOpeator_C(char *op);
 extern "C" void resetOperators_C();
 extern "C" void clearOperators_C();
+extern "C" int getOperatorArgCount_C(char *op);
 
 extern "C" int getErrorCode_C();
 extern "C" char* getErrorToken_C();
@@ -23,4 +24,5 @@ extern "C" int getErrorPosition_C();
 
 extern "C" bool validate_C(char *infix);
 extern "C" char* toPrefix_C(char *infix);
+extern "C" char* toInfix_C(char *prefix);
 #endif

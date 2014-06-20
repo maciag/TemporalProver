@@ -6,6 +6,7 @@ Item
 {
 	id: tree;
 	property TreeNode root;
+	property TreeCanvas canvas;
 	property int margin: 20;
 	
 	width: root == null ? 0 : scale * root.width;
@@ -13,54 +14,35 @@ Item
 	
 	transformOrigin: Item.TopLeft;
 	
-	Canvas
-	{
-		property var points;  // Przechowuje punkty. Łączy liniami 1 i 2,  3 i 4 itd.
-		
-		anchors.top: parent.top;
-		anchors.left: parent.left;
-		
-		width: parent.width / parent.scale;
-		height: parent.height / parent.scale;
-		renderStrategy: Canvas.Threaded;
-		
-		id: canvas;
-		
-		onPaint:
-		{
-			var context = getContext("2d");
-			var lineWidth = 2/parent.scale < 1;
-			context.lineWidth = (lineWidth) ? 1 : Math.round(lineWidth);
-			context.strokeStyle = "black";
-			
-			for(var i = 0; i < points.length; i += 2)
-			{
-				context.moveTo(margin+points[i].x, margin+points[i].y);
-				context.lineTo(margin+points[i+1].x, margin+points[i+1].y);
-				context.stroke();
-			}
-		}
-	}
+	Component.onCompleted: updateTree();
 	
-	Component.onCompleted:
+	function updateTree()
 	{
 		if(root == null)
 			return;
 		
-		root.parent = this;
-		canvas.points = [];
+		// Utworzenie canvas 
+		var component = Qt.createComponent("TreeCanvas.qml");
+		canvas = component.createObject(this);
+		
+		// Aktualizacja wymiarów
+		width = scale * root.width + 2*margin;
+		height = scale * root.height + 2*margin;
+		canvas.width = width / scale;
+		canvas.height = height / scale;
 		
 		// Wyliczenie punktów
+		canvas.points = [];
 		var rootCircle = root.children[0];
 		var coords = mapFromItem(rootCircle, rootCircle.x, rootCircle.y);
 		
-		addLines(root, width/(2*scale), 10);
-		
-		width = width+2*margin;
-		height = height+2*margin;
+		addLines(root, (width-2*margin)/(2*scale), 10);
 		
 		root.x = margin;
 		root.y = margin;
+		
+		// Ustawienie nadrzędnych
+		root.parent = this;
 	}
 	
 	// Dodaje linie łączące węzeł z jego dziećmi
@@ -72,6 +54,10 @@ Item
 		{
 			var childCircle = childCont.children[i].children[0];
 			var childCoords = mapFromItem(childCircle, childCircle.x, childCircle.y);
+			
+			// Z jakiegoś powodu w childCoords lądują liczby za małe o 7. Korekta.
+			childCoords.x += 7;
+			childCoords.y += 7;
 			
 			// Przeliczenie wpółrzędnych dziecka
 			var x = Math.round(childCoords.x - (childCont.children[i].width-20)/2 + 10);

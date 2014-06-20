@@ -9,6 +9,13 @@ ColumnLayout
 	property string character: "";
 	property Label valueLabel: null;
 	
+	property RowLayout childContainer: RowLayout
+	{
+		id: childContainer;
+		spacing: 20;
+		anchors.horizontalCenter: parent.horizontalCenter;
+	}
+	
 	id: node;
 	spacing: 20;
 	
@@ -58,10 +65,8 @@ ColumnLayout
 		}
 	}
 	
-	RowLayout
+	Component.onCompleted:
 	{
-		id: childContainer;
-		spacing: 20;
-		anchors.horizontalCenter: parent.horizontalCenter;
+		childContainer.parent = this;
 	}
 }

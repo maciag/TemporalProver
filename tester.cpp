@@ -59,7 +59,7 @@ int main() {
 			else if (errCode == ERRCODE_BRACKET_UNCLOSED)
 				cout << "Brakuje nawiasu zamykającego" << endl;
 
-			else if (errCode == ERRCODE_SPARE_RBRACE)
+			else if (errCode == ERRCODE_SPARE_RBRACK)
 				cout << "Nieoczekiwany nawias zamykający" << endl;
 
 			return 0;

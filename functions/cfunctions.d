@@ -56,6 +56,20 @@ extern(C) public void clearOperators_C()
 }
 
 /**
+ * Zwraca liczbę argumentów operatora
+ * 
+ * Returns:
+ * liczba argumentów lub 0, gdy operator jest zmienną lub nie istnieje
+ */
+extern(C) int getOperatorArgCount_C(char *operator)
+{
+	Runtime.initialize();
+	
+	string dstr = toImpl!(string, char*)(operator);
+	return getOperatorArgCount(dstr);
+}
+
+/**
  * Zwraca kod błędu
  * 
  * Returns:
