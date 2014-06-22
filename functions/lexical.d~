@@ -67,7 +67,7 @@ public void resetOperators()
 	setOperator("^", 3, false);
 	setOperator(">", 2, false);
 	setOperator("=", 1, false);
-	setOperator("!", 6, true);
+	setOperator("!", 5, true);
 	setOperator("U", 4, false);
 	setOperator("X", 5, true);
 	setOperator("G", 5, true);

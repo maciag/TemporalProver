@@ -17,7 +17,7 @@ class StringFormula {
 public:
 
 	enum decomposeType {
-		branching = 0, stacking, branching_stacking, single, none, error
+		branching = 0, stacking, branching_stacking, branching_substacking, single, none, error
 	};
 
 	StringFormula(string content);
@@ -37,6 +37,7 @@ public:
 
 private:
 	static map<string, token> tokenMap;
+	static map<token, string> symbolMap;
 
 	string rawContent;
 	string inflixContent;
@@ -49,7 +50,11 @@ private:
 	StringFormula subFormula(int begin, int end);
 	token getToken(int idx);
 	string getSymbol(int idx);
+	void pushOperatorFront(token op);
 	void negate();
+
+	static StringFormula compose(StringFormula left, token op, StringFormula right);
+
 	//TODO Wyznaczanie klasycznej postaci infiksowej (rawContent) na podstawie zapisu w notacji polskiej
 
 };

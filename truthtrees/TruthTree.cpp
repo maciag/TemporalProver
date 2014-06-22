@@ -55,6 +55,11 @@ bool TruthTree::decomposeStep() {
 		mainTree.append_child(currentNode, childNodes[1]);
 		return true;
 		break;
+	case StringFormula::decomposeType::branching_substacking:
+		mainTree.append_child(currentNode, childNodes[0]);
+		mainTree.append_child(currentNode, childNodes[1]);
+		return true;
+		break;
 	case StringFormula::stacking:
 		return true;
 		break;
@@ -85,7 +90,7 @@ string TruthTree::toFormattedString() {
 	tree<FormulaNode>::iterator it = mainTree.begin();
 	string formattedString;
 	while (it != mainTree.end()) {
-		formattedString.append((*it).toFormattedString()+"\n");
+		formattedString.append((*it).toFormattedString() + "\n");
 		++it;
 	}
 	return formattedString;

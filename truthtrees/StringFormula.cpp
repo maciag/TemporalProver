@@ -1,9 +1,18 @@
 #include "StringFormula.hpp"
 
-map<string, token> StringFormula::tokenMap =
-		{ { string("!"), token::tneg }, { string("&"), token::tand }, { string(
-				"|"), token::tor }, { string("^"), token::txor }, { string(">"),
-				token::timp }, { string("="), token::teq } };
+map<string, token> StringFormula::tokenMap = { { string("!"), token::tneg }, {
+		string("&"), token::tand }, { string("|"), token::tor }, { string("^"),
+		token::txor }, { string(">"), token::timp },
+		{ string("="), token::teq }, { string("X"), token::tnext }, { string(
+				"F"), token::tfin }, { string("U"), token::tunt }, { string(
+				"G"), token::talw } };
+
+map<token, string> StringFormula::symbolMap = { { token::tneg, string("!") }, {
+		token::tand, string("&") }, { token::tor, string("|") }, { token::txor,
+		string("^") }, { token::timp, string(">") },
+		{ token::teq, string("=") }, { token::tnext, string("X") }, {
+				token::tfin, string("F") }, { token::tunt, string("U") }, {
+				token::talw, string("G") } };
 
 StringFormula::StringFormula(string content) :
 		rawContent(content) {
@@ -47,16 +56,18 @@ StringFormula::StringFormula(vector<string> symbolArray) :
 
 void StringFormula::evalDecompositionType() {
 
+	// Przypadki, dla których nie jest wykonywana dalsza dekompozycja
+	// Pusta formuła
 	if (tokenArray.size() == 0) {
 		type = decomposeType::none;
 		return;
 	}
-
+	// Formuła składająca się tylko ze zmiennej
 	if (tokenArray[0] == token::tvar) {
 		type = decomposeType::none;
 		return;
 	}
-
+	// Formuła składająca się tylko z zaporzeczonej zmiennej
 	if (tokenArray[0] == token::tneg && tokenArray[1] == token::tvar) {
 		type = decomposeType::none;
 		return;
@@ -85,6 +96,18 @@ void StringFormula::evalDecompositionType() {
 			type = decomposeType::single;
 			break;
 
+		case token::tnext:
+			type = decomposeType::single;
+
+		case token::tfin:
+			type = decomposeType::stacking;
+
+		case token::tunt:
+			type = decomposeType::stacking;
+
+		case token::talw:
+			type = decomposeType::single;
+
 		default:
 			type = decomposeType::none;
 		}
@@ -104,6 +127,18 @@ void StringFormula::evalDecompositionType() {
 
 	case token::teq:
 		type = decomposeType::branching_stacking;
+		break;
+
+	case token::tfin:
+		type = decomposeType::branching;
+		break;
+
+	case token::tunt:
+		type = decomposeType::branching_substacking;
+		break;
+
+	case token::talw:
+		type = decomposeType::stacking;
 		break;
 
 	default:
@@ -139,7 +174,7 @@ token StringFormula::parseSymbol(string symbol) {
 
 	bool isAllNum = true;
 	for (int i = 0; i < symbol.size(); i++)
-		if (!isalnum(symbol[i]))
+		if (!islower(symbol[i]))
 			isAllNum = false;
 
 	if (isAllNum)
@@ -192,26 +227,79 @@ bool StringFormula::decompose(vector<StringFormula> &elements) {
 		if (tokenArray[idx] == token::tvar)
 			counter--;
 		else {
-			if (tokenArray[idx] != token::tneg)
+			if (tokenArray[idx] != token::tneg
+					&& tokenArray[idx] != token::tnext
+					&& tokenArray[idx] != token::tfin
+					&& tokenArray[idx] != token::talw)
 				counter++;
 		}
 	}
 
+	// Obsługa dekompozycji typu single oraz dekompozycji tworzących dwie formuły potomne z jednej wejściowej (operatory temporalne)
+
 	int begin = 1, end = idx + 1;
 	if (isNegated) {
+		// Podwójna negacja - !!f = f
 		if (tokenArray[begin] == token::tneg) {
 			elements.push_back(subFormula(begin + 1, end));
 			return true;
 		}
+		// Negacja operatora next - !Xf = X!f
+		else if (tokenArray[begin] == token::tnext) {
+			StringFormula newFormula = subFormula(begin + 1, end);
+			newFormula.pushOperatorFront(token::tneg);
+			newFormula.pushOperatorFront(token::tnext);
+			return true;
+		}
+		// Negacja operatora finally - !Ff = {!f, !XFf}
+		else if (tokenArray[begin] == token::tfin) {
+			StringFormula newFormulaFirst = subFormula(begin + 1, end),
+					newFormulaSecond = newFormulaFirst;
+			newFormulaFirst.negate();
+			newFormulaSecond.pushOperatorFront(token::tfin);
+			newFormulaSecond.pushOperatorFront(token::tnext);
+			newFormulaSecond.negate();
+			elements.push_back(newFormulaFirst);
+			elements.push_back(newFormulaSecond);
+			return true;
+		}
+		// Negacja operatora globally - !Gf = F!p
+		else if (tokenArray[begin] == token::talw) {
+			StringFormula newFormula = subFormula(begin + 1, end);
+			newFormula.negate();
+			newFormula.pushOperatorFront(token::tfin);
+			elements.push_back(newFormula);
+			return true;
+		}
 		begin++;
+	} else {
+		// Operator finally - Ff = {f, XFf}
+		if (tokenArray.front() == token::tfin) {
+			StringFormula newFormulaFirst = subFormula(begin, end),
+					newFormulaSecond = newFormulaFirst;
+			newFormulaSecond.pushOperatorFront(token::tfin);
+			newFormulaSecond.pushOperatorFront(token::tnext);
+			elements.push_back(newFormulaFirst);
+			elements.push_back(newFormulaSecond);
+			return true;
+		}
+		// Operator globally - Gf = {f, XGf}
+		if (tokenArray.front() == token::talw) {
+			StringFormula newFormula = subFormula(begin, end);
+			elements.push_back(newFormula);
+			newFormula.pushOperatorFront(token::talw);
+			newFormula.pushOperatorFront(token::tnext);
+			elements.push_back(newFormula);
+		}
 	}
+	// Obsługa dekompozycji typu stacking, branching i branching-stacking
 
 	StringFormula first = subFormula(begin, end);
 	StringFormula second = subFormula(end, symbolArray.size());
 
 	switch (tokenArray.front()) {
+	// Zanegowane operatory
 	case token::tneg:
-
 		switch (tokenArray[1]) {
 		case token::tand:
 			first.negate();
@@ -247,6 +335,20 @@ bool StringFormula::decompose(vector<StringFormula> &elements) {
 			return true;
 			break;
 		}
+
+		case token::tunt: {
+			StringFormula newFormula = compose(first, token::tunt, second);
+			newFormula.pushOperatorFront(token::tnext);
+			newFormula.negate();
+			first.negate();
+			newFormula = compose(first, token::tor, newFormula);
+			second.negate();
+			elements.push_back(second);
+			elements.push_back(newFormula);
+			return true;
+			break;
+		}
+
 		}
 		break;
 
@@ -281,6 +383,15 @@ bool StringFormula::decompose(vector<StringFormula> &elements) {
 		break;
 	}
 
+	case token::tunt: {
+		StringFormula newFormula = compose(first, token::tunt, second);
+		newFormula.pushOperatorFront(token::tnext);
+		elements.push_back(second);
+		elements.push_back(first);
+		elements.push_back(newFormula);
+		break;
+	}
+
 	default:
 		return false;
 
@@ -299,6 +410,24 @@ void StringFormula::negate() {
 
 }
 
+void StringFormula::pushOperatorFront(token op) {
+
+	map<token, string>::const_iterator val = symbolMap.find(op);
+	if (val == symbolMap.end())
+		throw runtime_error("Corrupted input operator");
+
+	if (op != token::tneg && op != token::tnext && op != token::talw
+			&& op != token::tfin)
+		throw runtime_error(
+				"Wrong non-unary operator type: " + val->second
+						+ " - will cause formula corruption");
+
+	tokenArray.insert(tokenArray.begin(), op);
+	symbolArray.insert(symbolArray.begin(), val->second);
+	inflixContent.insert(0, val->second + " ");
+	evalDecompositionType();
+}
+
 StringFormula StringFormula::subFormula(int begin, int end) {
 
 	if (begin < 0 || end > symbolArray.size())
@@ -313,33 +442,33 @@ StringFormula StringFormula::subFormula(int begin, int end) {
 ostream& operator<<(ostream& os, const StringFormula& stringFormula) {
 
 	/*os << stringFormula.rawContent << "   " << stringFormula.inflixContent
-			<< "  ";
-	for (int i = 0; i < stringFormula.tokenArray.size(); i++) {
-		switch (stringFormula.tokenArray[i]) {
-		case token::tneg:
-			os << " " << "tneg";
-			break;
-		case token::tand:
-			os << " " << "tand";
-			break;
-		case token::tor:
-			os << " " << "tor";
-			break;
-		case token::txor:
-			os << " " << "txor";
-			break;
-		case token::timp:
-			os << " " << "timp";
-			break;
-		case token::teq:
-			os << " " << "teq";
-			break;
-		case token::tvar:
-			os << " " << "tvar";
-			break;
-		}
-	}
-	*/
+	 << "  ";
+	 for (int i = 0; i < stringFormula.tokenArray.size(); i++) {
+	 switch (stringFormula.tokenArray[i]) {
+	 case token::tneg:
+	 os << " " << "tneg";
+	 break;
+	 case token::tand:
+	 os << " " << "tand";
+	 break;
+	 case token::tor:
+	 os << " " << "tor";
+	 break;
+	 case token::txor:
+	 os << " " << "txor";
+	 break;
+	 case token::timp:
+	 os << " " << "timp";
+	 break;
+	 case token::teq:
+	 os << " " << "teq";
+	 break;
+	 case token::tvar:
+	 os << " " << "tvar";
+	 break;
+	 }
+	 }
+	 */
 	os << stringFormula.inflixContent;
 
 	return os;
@@ -347,4 +476,27 @@ ostream& operator<<(ostream& os, const StringFormula& stringFormula) {
 
 StringFormula::decomposeType StringFormula::getType() {
 	return type;
+}
+
+StringFormula StringFormula::compose(StringFormula left, token op,
+		StringFormula right) {
+
+	map<token, string>::const_iterator val = symbolMap.find(op);
+	if (val == symbolMap.end())
+		throw runtime_error("Corrupted input operator");
+
+	if (op != token::tand && op != token::tor && op != token::timp
+			&& op != token::teq && op != token::tunt)
+		throw runtime_error(
+				"Wrong non-binary operator type: " + val->second
+						+ " - will cause formula corruption");
+
+	vector<string> newSymbolArray;
+	newSymbolArray.push_back(val->second);
+	for (int i = 0; i < left.symbolArray.size(); i++)
+		newSymbolArray.push_back(left.symbolArray[i]);
+	for (int i = 0; i < right.symbolArray.size(); i++)
+		newSymbolArray.push_back(right.symbolArray[i]);
+	return StringFormula(newSymbolArray);
+
 }

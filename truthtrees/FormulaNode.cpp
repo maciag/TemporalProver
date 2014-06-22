@@ -29,7 +29,8 @@ StringFormula::decomposeType FormulaNode::decomposeNext(
 
 	if (!allChecked) {
 
-		int stackIdx = -1, singleIdx = -1, stackBranchIdx = -1, branchIdx = -1;
+		int stackIdx = -1, singleIdx = -1, stackBranchIdx = -1,
+				substackBranchIdx = -1, branchIdx = -1;
 		if (formulas.size() < 1)
 			return StringFormula::decomposeType::none;
 		for (int i = 0; i < formulas.size(); i++) {
@@ -43,6 +44,9 @@ StringFormula::decomposeType FormulaNode::decomposeNext(
 				} else if (formulas[i].getType()
 						== StringFormula::decomposeType::branching_stacking) {
 					stackBranchIdx = i;
+				} else if (formulas[i].getType()
+						== StringFormula::decomposeType::branching_substacking) {
+					substackBranchIdx = i;
 				} else if (formulas[i].getType()
 						== StringFormula::decomposeType::branching) {
 					branchIdx = i;
@@ -76,6 +80,15 @@ StringFormula::decomposeType FormulaNode::decomposeNext(
 				childNodes[i].appendFormula(subformulas[2 * i + 1]);
 			}
 			return StringFormula::decomposeType::branching_stacking;
+		} else if (substackBranchIdx >= 0) {
+			childNodes.clear();
+			childNodes.resize(2);
+			vector<StringFormula> subformulas;
+			formulas[substackBranchIdx].decompose(subformulas);
+			isChecked[substackBranchIdx] = true;
+			childNodes[0].appendFormula(subformulas[0]);
+			childNodes[1].appendFormula(subformulas[1]);
+			childNodes[1].appendFormula(subformulas[2]);
 		} else if (branchIdx >= 0) {
 			childNodes.clear();
 			childNodes.resize(2);

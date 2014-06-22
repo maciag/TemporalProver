@@ -9,7 +9,11 @@ enum token {
 	tor,
 	txor,
 	timp,
-	teq
+	teq,
+	tnext,
+	tfin,
+	tunt,
+	talw
 
 };
 
