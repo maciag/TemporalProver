@@ -92,6 +92,9 @@ ApplicationWindow
 						formulaOverlay.setFormula("");
 						formulaOverlay.visible = true;
 						formulaOverlay.save.connect(appendPred);
+						
+						formulaOverlay.focus();
+						formulaOverlay.selectAll();
 					}
 				}
 				
@@ -107,6 +110,9 @@ ApplicationWindow
 							formulaOverlay.setFormula(predList.model.get(predList.currentRow).value);
 							formulaOverlay.visible = true;
 							formulaOverlay.save.connect(updatePred);
+							
+							formulaOverlay.focus();
+							formulaOverlay.selectAll();
 						}
 					}
 				}
@@ -156,14 +162,37 @@ ApplicationWindow
 				
 				Label
 				{
+					id: conclusionLabel;
+					text: "0";  // Niech konkluzja nigdy nie będzie pusta
 					Layout.fillWidth: true;
 					elide: Text.ElideRight;
+					
+					MouseArea
+					{
+						anchors.fill: parent;
+						onClicked:
+						{
+							predList.selection.clear();
+							generateExpressionTree(conclusionLabel.text);
+							tabs.currentIndex = 1;
+						}
+					}
 				}
 				
 				ToolButton
 				{
 					iconSource: "img/edit.svg";
 					tooltip: "Edytuj";
+					
+					onClicked:
+					{
+						formulaOverlay.setFormula(conclusionLabel.text);
+						formulaOverlay.visible = true;
+						formulaOverlay.save.connect(editConc);
+						
+						formulaOverlay.focus();
+						formulaOverlay.selectAll();
+					}
 				}
 			}
 			
@@ -263,6 +292,17 @@ ApplicationWindow
 		tabs.currentIndex = 1;
 		
 		formulaOverlay.save.disconnect(updatePred);  // Odłączamy od razu sygnał
+	}
+	
+	function editConc(formula)
+	{
+		conclusionLabel.text = formula;
+		
+		predList.selection.clear();
+		generateExpressionTree(formula);
+		tabs.currentIndex = 1;
+		
+		formulaOverlay.save.disconnect(editConc);
 	}
 	
 	function generateExpressionTree(formula)

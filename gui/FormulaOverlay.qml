@@ -67,6 +67,16 @@ Overlay
 		formulaArea.text = text;
 	}
 	
+	function focus()
+	{
+		formulaArea.focus = true;
+	}
+	
+	function selectAll()
+	{
+		formulaArea.selectAll();
+	}
+	
 	function getErrorMessage(code, token, position)
 	{
 		var pos = formulaArea.cursorPosition;
