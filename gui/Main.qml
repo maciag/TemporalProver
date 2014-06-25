@@ -118,8 +118,23 @@ ApplicationWindow
 					
 					onClicked:
 					{
+						var nextIndex = -1;
+						if(predList.rowCount > predList.currentRow+1)
+							nextIndex = predList.currentRow;
+						else if(predList.currentRow > 0)
+							nextIndex = predList.currentRow-1;
+						
 						if(predList.currentRow >= 0)
 							predList.model.remove(predList.currentRow);
+						
+						predList.selection.clear();
+						if(nextIndex >= 0)
+						{
+							predList.selection.select(nextIndex);
+							generateExpressionTree(predList.model.get(nextIndex).value);
+						}
+						else
+							generateExpressionTree("");
 					}
 				}
 				
@@ -179,9 +194,16 @@ ApplicationWindow
 					
 					onClicked:  // TODO: do poprawy!
 					{
-						var currentTree = tabs.getTab(tabs.currentIndex).children[0].children[0];
-						var newScale = currentTree.scale + 0.1;
-						currentTree.scale = newScale > 1 ? 1 : newScale;
+						var currentTree = tabs.getTab(tabs.currentIndex).children[0].contentItem;
+						
+						if(currentTree.canvas != null)
+						{
+							var newScale = currentTree.canvas.scale + 0.1;
+							currentTree.canvas.scale = newScale > 1 ? 1 : newScale;
+							
+							currentTree.width = currentTree.canvas.width * currentTree.canvas.scale;
+							currentTree.height = currentTree.canvas.height * currentTree.canvas.scale;
+						}
 					}
 				}
 				
@@ -192,10 +214,16 @@ ApplicationWindow
 					
 					onClicked: // TODO: do poprawy!
 					{
-						var currentTree = tabs.getTab(tabs.currentIndex).children[0].children[0];
-						var newScale = currentTree.scale - 0.1;
+						var currentTree = tabs.getTab(tabs.currentIndex).children[0].contentItem;
 						
-						currentTree.scale = newScale < 0.1 ? 0.1 : newScale;
+						if(currentTree.canvas != null)
+						{
+							var newScale = currentTree.canvas.scale - 0.1;
+							currentTree.canvas.scale = newScale < 0.1 ? 0.1 : newScale;
+							
+							currentTree.width = currentTree.canvas.width * currentTree.canvas.scale;
+							currentTree.height = currentTree.canvas.height * currentTree.canvas.scale;
+						}
 					}
 				}
 			}
@@ -218,13 +246,22 @@ ApplicationWindow
 	function appendPred(formula)
 	{
 		predList.model.append({value: formula});
+		
+		predList.selection.clear();
+		predList.selection.select(predList.rowCount-1);
+		generateExpressionTree(formula);
+		tabs.currentIndex = 1;
+		
 		formulaOverlay.save.disconnect(appendPred);  // Odłączamy od razu sygnał
 	}
 	
 	function updatePred(formula)
 	{
 		predList.model.set(predList.currentRow, {value: formula});
+		
 		generateExpressionTree(formula);
+		tabs.currentIndex = 1;
+		
 		formulaOverlay.save.disconnect(updatePred);  // Odłączamy od razu sygnał
 	}
 	
@@ -232,16 +269,20 @@ ApplicationWindow
 	{
 		var tree = expressionTreeTab.children[0].contentItem;
 		
-		if(tree.root != null)
+		if(tree.canvas != null)
 		{
+			tree.canvas.update();
 			tree.canvas.destroy();
-			tree.root = null;
 			tree.canvas = null;
 		}
 		
-		tree.setPrefix(cppBridge.toPrefix(formula));
+		if(formula != "")
+			tree.setPrefix(cppBridge.toPrefix(formula));
+		else
+			tree.setPrefix("");
 		
-		tree.canvas.nodeClicked.connect(nodePreview);
+		if(tree.canvas != null)
+			tree.canvas.nodeClicked.connect(nodePreview);
 	}
 	
 	// Podgląd węzła drzewa

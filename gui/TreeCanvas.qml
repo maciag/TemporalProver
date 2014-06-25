@@ -10,6 +10,7 @@ Canvas
 	
 	anchors.top: parent.top;
 	anchors.left: parent.left;
+	transformOrigin: Item.TopLeft;
 	
 	renderStrategy: Canvas.Threaded;
 	renderTarget: Canvas.FramebufferObject;

@@ -11,8 +11,6 @@ Item
 	property int contentWidth: 0;
 	property int contentHeight: 0;
 	
-	transformOrigin: Item.TopLeft;
-	
 	Component.onCompleted: setPrefix();
 	
 	QtObject
@@ -27,7 +25,7 @@ Item
 	
 	function setPrefix(prefix)
 	{
-		if(prefix == undefined)
+		if(prefix == undefined || prefix == "")
 			return;
 		
 		// Utworzenie canvas 
@@ -41,10 +39,12 @@ Item
 		treeGen.y = 0;
 		treeGen.tokens = prefix.split(" ");
 		
+		contentWidth = 0;
+		contentHeight = 0;
 		computeToken();
 		
-		width = /*scale * */contentWidth;
-		height = /*scale * */contentHeight;
+		width = contentWidth;
+		height = contentHeight;
 		
 		canvas.width = contentWidth;
 		canvas.height = contentHeight;
