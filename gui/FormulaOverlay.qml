@@ -6,6 +6,8 @@ import CppBridge 1.0
 
 Overlay
 {
+	signal save(string formula);
+	
 	id: formulaOverlay;
 	title: "Edycja formuły";
 	
@@ -60,7 +62,7 @@ Overlay
 		return formulaArea.text();
 	}
 	
-	function setText(text)
+	function setFormula(text)
 	{
 		formulaArea.text = text;
 	}
@@ -123,6 +125,4 @@ Overlay
 			}
 		}
 	}
-	
-	signal save(string formula);
 }

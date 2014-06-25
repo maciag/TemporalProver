@@ -6,7 +6,7 @@ Canvas
 	property var nodes: [];  // Węzły
 	property var linePoints: [];  // Pozycje x i y węzłów - łączenia 1 i 2, 3 i 4 itd.
 	
-	property Label valueLabel: null;
+	signal nodeClicked(string token, string value);
 	
 	anchors.top: parent.top;
 	anchors.left: parent.left;
@@ -29,8 +29,7 @@ Canvas
 			{
 				if(nodes[i].x == x && nodes[i].y == y)
 				{
-					if(valueLabel != null)
-						valueLabel.text = nodes[i].value;
+					nodeClicked(nodes[i].token, nodes[i].value);
 				}
 			}
 		}

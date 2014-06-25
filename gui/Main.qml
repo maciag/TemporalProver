@@ -15,44 +15,36 @@ ApplicationWindow
 		anchors.fill: parent;
 		anchors.margins: spacing;
 		
-		ColumnLayout
+		TabView
 		{
-			TabView
+			id: tabs;
+			
+			Layout.fillWidth: true;
+			Layout.fillHeight: true;
+			Layout.minimumWidth: 200;
+			Layout.minimumHeight: 200;
+			tabPosition: Qt.BottomEdge;
+			
+			Tab
 			{
-				id: tabs;
+				title: "Drzewo prawdy";
+				id: truthTreeTab;
 				
-				Layout.fillWidth: true;
-				Layout.fillHeight: true;
-				Layout.minimumWidth: 200;
-				Layout.minimumHeight: 200;
-				tabPosition: Qt.BottomEdge;
-				
-				Tab
+				ScrollView
 				{
-					title: "Drzewo prawdy";
-					id: truthTreeTab;
-					
-					ScrollView
-					{
-						Tree {}
-					}
-				}
-				
-				Tab
-				{
-					title: "Drzewo wyrażenia";
-					id: expressionTreeTab;
-					
-					ScrollView
-					{
-						Tree {}
-					}
+					Tree {}
 				}
 			}
 			
-			Label
+			Tab
 			{
-				id: nodeValue;
+				title: "Drzewo wyrażenia";
+				id: expressionTreeTab;
+				
+				ScrollView
+				{
+					Tree {}
+				}
 			}
 		}
 		
@@ -97,7 +89,7 @@ ApplicationWindow
 					
 					onClicked:
 					{
-						formulaOverlay.setText("");
+						formulaOverlay.setFormula("");
 						formulaOverlay.visible = true;
 						formulaOverlay.save.connect(appendPred);
 					}
@@ -112,7 +104,7 @@ ApplicationWindow
 					{
 						if(predList.currentRow >= 0)
 						{
-							formulaOverlay.setText(predList.model.get(predList.currentRow).value);
+							formulaOverlay.setFormula(predList.model.get(predList.currentRow).value);
 							formulaOverlay.visible = true;
 							formulaOverlay.save.connect(updatePred);
 						}
@@ -220,6 +212,7 @@ ApplicationWindow
 	// Overlay'e dialogowe
 	FormulaOverlay { id: formulaOverlay; }
 	ProgressOverlay { id: progressOverlay; }
+	NodeValueOverlay { id: nodeValueOverlay; }
 	
 	// Funkcje dotyczące predykatów
 	function appendPred(formula)
@@ -247,6 +240,14 @@ ApplicationWindow
 		}
 		
 		tree.setPrefix(cppBridge.toPrefix(formula));
-		tree.canvas.valueLabel = nodeValue;
+		
+		tree.canvas.nodeClicked.connect(nodePreview);
+	}
+	
+	// Podgląd węzła drzewa
+	function nodePreview(token, value)
+	{
+		nodeValueOverlay.setFormula(value);
+		nodeValueOverlay.visible = true;
 	}
 }

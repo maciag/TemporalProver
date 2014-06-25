@@ -29,6 +29,11 @@ Item
 		opacity: 0.5;
 	}
 	
+	MouseArea  // Zjada zdarzenia myszy, żeby overlay był modalny.
+	{
+		anchors.fill: parent;
+	}
+	
 	Rectangle
 	{
 		width: dialogWidth;
