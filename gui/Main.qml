@@ -34,10 +34,7 @@ ApplicationWindow
 					
 					ScrollView
 					{
-						Tree
-						{
-							root: null;
-						}
+						Tree {}
 					}
 				}
 				
@@ -48,10 +45,7 @@ ApplicationWindow
 					
 					ScrollView
 					{
-						Tree
-						{
-							root: null;
-						}
+						Tree {}
 					}
 				}
 			}
@@ -86,7 +80,7 @@ ApplicationWindow
 					title: "";
 				}
 				
-				onActivated:
+				onClicked:
 				{
 					tabs.currentIndex = 1;
 					generateExpressionTree(model.get(currentRow).value);
@@ -185,12 +179,13 @@ ApplicationWindow
 			RowLayout
 			{
 				anchors.horizontalCenter: parent.horizontalCenter;
+				
 				ToolButton
 				{
 					iconSource: "img/zoomIn.svg";
 					tooltip: "Powiększ";
 					
-					onClicked:
+					onClicked:  // TODO: do poprawy!
 					{
 						var currentTree = tabs.getTab(tabs.currentIndex).children[0].children[0];
 						var newScale = currentTree.scale + 0.1;
@@ -203,10 +198,11 @@ ApplicationWindow
 					iconSource: "img/zoomOut.svg";
 					tooltip: "Pomniejsz";
 					
-					onClicked:
+					onClicked: // TODO: do poprawy!
 					{
 						var currentTree = tabs.getTab(tabs.currentIndex).children[0].children[0];
 						var newScale = currentTree.scale - 0.1;
+						
 						currentTree.scale = newScale < 0.1 ? 0.1 : newScale;
 					}
 				}
@@ -239,64 +235,18 @@ ApplicationWindow
 		formulaOverlay.save.disconnect(updatePred);  // Odłączamy od razu sygnał
 	}
 	
-	QtObject  // Wewnętrzne własności
-	{
-		id: treeGen;
-		property variant tokens;
-		property int index;
-		
-		property variant treeNodeComponent: Qt.createComponent("TreeNode.qml");
-	}
-	
-	// Funkcje dotyczące drzew
 	function generateExpressionTree(formula)
 	{
-		var prefix = cppBridge.toPrefix(formula);
-		treeGen.tokens = prefix.split(" ");
-		treeGen.index = 0;
-		
 		var tree = expressionTreeTab.children[0].contentItem;
 		
 		if(tree.root != null)
 		{
-			tree.root.destroy();
 			tree.canvas.destroy();
 			tree.root = null;
 			tree.canvas = null;
 		}
 		
-		tree.root = generateExpressionTreeNode();
-		tree.updateTree();
-	}
-	
-	function generateExpressionTreeNode()
-	{
-		var node = treeGen.treeNodeComponent.createObject();
-		var nodeToken = treeGen.tokens[treeGen.index]
-		
-		// Określanie ilości elementów do zapisu infiksowego
-		var prefix = nodeToken + " ";
-		var argBalance = cppBridge.getOperatorArgCount(nodeToken);
-		var i = treeGen.index+1;
-		
-		while(argBalance > 0)
-		{
-			prefix += treeGen.tokens[i] + " ";
-			argBalance += cppBridge.getOperatorArgCount(treeGen.tokens[i]) - 1;
-			i++;
-		}
-		
-		// Dodawanie dzieci
-		for(var i = 0; i < cppBridge.getOperatorArgCount(nodeToken); i++)
-		{
-			treeGen.index++;
-			var child = generateExpressionTreeNode();
-			child.parent = node.childContainer;
-		}
-		
-		node.character = nodeToken.length > 1 ? "..." : nodeToken;
-		node.value = cppBridge.toInfix(prefix);
-		node.valueLabel = nodeValue;
-		return node;
+		tree.setPrefix(cppBridge.toPrefix(formula));
+		tree.canvas.valueLabel = nodeValue;
 	}
 }

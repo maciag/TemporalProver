@@ -1,26 +1,33 @@
 #include "GUI.hpp"
 
+#include <iostream>
+using namespace std;
+
 bool QmlBridge::validate(QString formula)
 {
-	char* cstr = formula.toUtf8().data();
+	QByteArray bytearray = formula.toUtf8();
+	char* cstr = bytearray.data();
 	return validate_C(cstr);
 }
 
 QString QmlBridge::toPrefix(QString formula)
 {
-	char* cstr = formula.toUtf8().data();
+	QByteArray bytearray = formula.toUtf8();
+	char* cstr = bytearray.data();
 	return QString::fromUtf8(toPrefix_C(cstr));
 }
 
 QString QmlBridge::toInfix(QString formula)
 {
-	char* cstr = formula.toUtf8().data();
+	QByteArray bytearray = formula.toUtf8();
+	char* cstr = bytearray.data();
 	return QString::fromUtf8(toInfix_C(cstr));
 }
 
 int QmlBridge::getOperatorArgCount(QString formula)
 {
-	char* cstr = formula.toUtf8().data();
+	QByteArray bytearray = formula.toUtf8();
+	char* cstr = bytearray.data();
 	return getOperatorArgCount_C(cstr);
 }
 

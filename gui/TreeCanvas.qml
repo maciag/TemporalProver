@@ -1,30 +1,79 @@
 import QtQuick 2.2
+import QtQuick.Controls 1.1
 
 Canvas
 {
-	property var points: [];  // Przechowuje punkty. Łączy liniami 1 i 2,  3 i 4 itd.
+	property var nodes: [];  // Węzły
+	property var linePoints: [];  // Pozycje x i y węzłów - łączenia 1 i 2, 3 i 4 itd.
+	
+	property Label valueLabel: null;
 	
 	anchors.top: parent.top;
 	anchors.left: parent.left;
 	
-	width: parent.width / parent.scale;
-	height: parent.height / parent.scale;
 	renderStrategy: Canvas.Threaded;
+	renderTarget: Canvas.FramebufferObject;
 	
 	id: canvas;
+	
+	MouseArea
+	{
+		anchors.fill: parent;
+		
+		onClicked:
+		{
+			var x = Math.floor((mouse.x - margin) / 20);
+			var y = Math.floor(((mouse.y - margin) / 40) - ((((mouse.y - margin) % 40) > 20) ? 1000000 : 0));  // Między wierszami skieruj na brak węzła
+			
+			for(var i = 0; i < nodes.length; i++)
+			{
+				if(nodes[i].x == x && nodes[i].y == y)
+				{
+					if(valueLabel != null)
+						valueLabel.text = nodes[i].value;
+				}
+			}
+		}
+	}
 	
 	onPaint:
 	{
 		var context = getContext("2d");
-		var lineWidth = 2/parent.scale < 1;
-		context.lineWidth = (lineWidth) ? 1 : Math.round(lineWidth);
+		
+		context.strokeStyle = "black";
+		context.fillStyle = "white";
+		context.fillRect(0, 0, width, height);
+		
+		context.font = "bold 14px sans-serif";
+		context.textAlign = "center";
+		context.textBaseline = "middle";
+		
+		// Linie
+		context.lineWidth = 2;
 		context.strokeStyle = "black";
 		
-		for(var i = 0; i < points.length; i += 2)
+		for(var i = 0; i < linePoints.length; i += 2)
 		{
-			context.moveTo(margin+points[i].x, margin+points[i].y);
-			context.lineTo(margin+points[i+1].x, margin+points[i+1].y);
+			context.moveTo(margin+20*linePoints[i].x+10, margin+40*linePoints[i].y+10);
+			context.lineTo(margin+20*linePoints[i+1].x+10, margin+40*linePoints[i+1].y+10);
 			context.stroke();
+		}
+		
+		// Węzły
+		context.fillStyle = "black";
+		for(var i = 0; i < nodes.length; i++)
+		{
+			context.ellipse(margin+20*nodes[i].x, margin+40*nodes[i].y, 20, 20);
+			context.fill();
+			context.stroke();
+			
+		}
+		
+		// Tokeny węzłów
+		context.fillStyle = "white";
+		for(var i = 0; i < nodes.length; i++)
+		{
+			context.fillText(nodes[i].token, margin+20*nodes[i].x+10, margin+40*nodes[i].y+12);
 		}
 	}
 }
