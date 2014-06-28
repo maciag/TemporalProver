@@ -31,6 +31,49 @@ int QmlBridge::getOperatorArgCount(QString formula)
 	return getOperatorArgCount_C(cstr);
 }
 
+// Ustawienie operatora wykorzystywanego przez TruthTree (pośrednio)
+// QString token - semantyczna definicja operatora - ciąg znaków opisujący znaczenie opratora, np. and, or, etc.
+// QString symbol - syntaktyczna definicja operatora - ciąg znaków symbolizujący operator, np. &, |, etc.
+// return - true w przypadku powodzenia, false w przypadku nierozpoznania parametru token - dozwolone wartości:
+// and, or, xor, impl, eq, not, tempU, tempX, tempG, tempF
+bool QmlBridge::setTruthTreeOperator(QString token, QString symbol)
+{
+	if (token == "and") {
+		// TODO Thread wrapper - ustawienie operatora, funkcja wykorzystująca argument symbol i kojarząca go
+		// z jego odpowiednikiem w postaci typu wyliczeniowego zdefiniowanego w pliku LexicalTable.hpp
+		return true;
+	} else if (token == "or") {
+
+		return true;
+	} else if (token == "xor") {
+
+		return true;
+	} else if (token == "impl") {
+
+		return true;
+	} else if (token == "eq") {
+
+		return true;
+	} else if (token == "not") {
+
+		return true;
+	} else if (token == "tempU") {
+
+		return true;
+	} else if (token == "tempX") {
+
+		return true;
+	} else if (token == "tempG") {
+
+		return true;
+	} else if (token == "tempF") {
+
+		return true;
+	}
+	// Nie rozpoznano operatora
+	return false;
+}
+
 
 QmlBridge::ErrorCode QmlBridge::getErrorCode()
 {
