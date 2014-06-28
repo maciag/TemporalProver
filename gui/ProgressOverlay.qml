@@ -4,12 +4,11 @@ import QtQuick.Layouts 1.1
 
 Overlay
 {
-	property real progress;
 	property string status;
 	
 	id: progressOverlay;
 	title: "Liczę...";
-	dialogHeight: 70;
+	dialogHeight: 43;
 	
 	closeButton: ToolButton
 	{
@@ -17,6 +16,7 @@ Overlay
 		tooltip: "Anuluj";
 		onClicked:
 		{
+			cancel();
 			progressOverlay.visible = false;
 		}
 	}
@@ -28,24 +28,10 @@ Overlay
 		anchors.left: parent.left;
 		anchors.right: parent.right;
 		anchors.top: parent.top;
-		value: progress;
+		indeterminate: true;
 		
 		height: 5;
 	}
 	
-	Rectangle
-	{
-		anchors.top: progressBar.bottom;
-		anchors.bottom: parent.bottom;
-		
-		Label
-		{
-			anchors.verticalCenter: parent.verticalCenter;
-			
-			anchors.left: parent.left;
-			anchors.right: parent.right;
-			
-			text: status;
-		}
-	}
+	signal cancel();
 }

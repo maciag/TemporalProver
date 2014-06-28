@@ -13,7 +13,7 @@ import prefix;
  * precedence = priorytet operatora
  * unary = jeden argument (jak false, to dwa). Operatory unarne stoją z przodu argumentu
  */
-public void setOperator_C(char* operator, int precedence, bool unary)
+extern(C) public void setOperator_C(char* operator, int precedence, bool unary)
 {
 	Runtime.initialize();
 	

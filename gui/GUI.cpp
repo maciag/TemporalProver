@@ -78,6 +78,19 @@ int QmlBridge::getErrorPosition()
 	return getErrorPosition_C();
 }
 
+void QmlBridge::setParserOperator(QString symbol, int precedence, bool unary)
+{
+	QByteArray bytearray = symbol.toUtf8();
+	char* cstr = bytearray.data();
+	
+	setOperator_C(cstr, precedence, unary);
+}
+
+void QmlBridge::clearParserOperators()
+{
+	clearOperators_C();
+}
+
 void initGUI()
 {
 	int argc = 0;

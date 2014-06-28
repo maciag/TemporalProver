@@ -196,6 +196,18 @@ ApplicationWindow
 				}
 			}
 			
+			Button
+			{
+				implicitWidth: 200;
+				text: "Operatory...";
+				
+				onClicked:
+				{
+					operatorEditOverlay.updateTextFields();
+					operatorEditOverlay.visible = true;
+				}
+			}
+			
 			HeaderLabel
 			{
 				text: "Wynik";
@@ -270,6 +282,11 @@ ApplicationWindow
 	FormulaOverlay { id: formulaOverlay; }
 	ProgressOverlay { id: progressOverlay; }
 	NodeValueOverlay { id: nodeValueOverlay; }
+	OperatorEditOverlay
+	{
+		id: operatorEditOverlay;
+		onSave: updateOperators();
+	}
 	
 	// Funkcje dotyczące predykatów
 	function appendPred(formula)
@@ -330,5 +347,22 @@ ApplicationWindow
 	{
 		nodeValueOverlay.setFormula(value);
 		nodeValueOverlay.visible = true;
+	}
+	
+	// Aktualizacja operatorów
+	function updateOperators()
+	{
+		cppBridge.clearParserOperators();
+		
+		cppBridge.setParserOperator(operatorEditOverlay.and, 3, false);
+		cppBridge.setParserOperator(operatorEditOverlay.or, 3, false);
+		cppBridge.setParserOperator(operatorEditOverlay.xor, 3, false);
+		cppBridge.setParserOperator(operatorEditOverlay.impl, 2, false);
+		cppBridge.setParserOperator(operatorEditOverlay.eq, 1, false);
+		cppBridge.setParserOperator(operatorEditOverlay.not, 6, true);
+		cppBridge.setParserOperator(operatorEditOverlay.tempU, 4, false);
+		cppBridge.setParserOperator(operatorEditOverlay.tempX, 5, true);
+		cppBridge.setParserOperator(operatorEditOverlay.tempG, 5, true);
+		cppBridge.setParserOperator(operatorEditOverlay.tempF, 5, true);
 	}
 }

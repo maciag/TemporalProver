@@ -16,7 +16,10 @@ Overlay
 	{
 		iconSource: "img/load.svg";
 		tooltip: "Wczytaj z pliku";
-		onClicked: {  }
+		onClicked:
+		{
+			// TODO Wczytanie operatorów z pliku
+		}
 	},
 	
 	ToolButton
@@ -30,9 +33,9 @@ Overlay
 			
 			if(validate)
 			{
-				save(formula);
 				toast.visible = false;
 				formulaOverlay.visible = false;
+				save(formula);
 			}
 			
 			else

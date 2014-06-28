@@ -47,6 +47,9 @@ class QmlBridge : public QObject
 	Q_INVOKABLE ErrorCode getErrorCode();
 	Q_INVOKABLE QString getErrorToken();
 	Q_INVOKABLE int getErrorPosition();
+	
+	Q_INVOKABLE void setParserOperator(QString symbol, int precedence, bool unary);
+	Q_INVOKABLE void clearParserOperators();
 };
 
 // GUI

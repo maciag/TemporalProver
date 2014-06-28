@@ -12,8 +12,8 @@ extern "C" const int ERRCODE_INVALID_TOKEN;
 extern "C" const int ERRCODE_BRACKET_UNCLOSED;
 extern "C" const int ERRCODE_SPARE_RBRACK;
 
-extern "C" void setOpeator_C(char *op, int precedence, bool unary);
-extern "C" void unsetOpeator_C(char *op);
+extern "C" void setOperator_C(char *op, int precedence, bool unary);
+extern "C" void unsetOperator_C(char *op);
 extern "C" void resetOperators_C();
 extern "C" void clearOperators_C();
 extern "C" int getOperatorArgCount_C(char *op);
