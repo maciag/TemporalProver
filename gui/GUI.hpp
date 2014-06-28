@@ -9,6 +9,7 @@
 #include <QUrl>
 
 #include <../functions/prefix.h>
+#include <../truthtrees/LexicalTable.hpp>
 
 /**
  * Klasa służąca do wywoływania metod C++ z poziomu QML.
@@ -43,6 +44,7 @@ class QmlBridge : public QObject
 	Q_INVOKABLE QString toPrefix(QString formula);
 	Q_INVOKABLE QString toInfix(QString formula);
 	Q_INVOKABLE int getOperatorArgCount(QString formula);
+	Q_INVOKABLE bool setTruthTreeOperator(QString token, QString symbol);
 	
 	Q_INVOKABLE ErrorCode getErrorCode();
 	Q_INVOKABLE QString getErrorToken();
