@@ -364,5 +364,16 @@ ApplicationWindow
 		cppBridge.setParserOperator(operatorEditOverlay.tempX, 5, true);
 		cppBridge.setParserOperator(operatorEditOverlay.tempG, 5, true);
 		cppBridge.setParserOperator(operatorEditOverlay.tempF, 5, true);
+		
+		cppBridge.setTruthTreeOperator("and", operatorEditOverlay.and);
+		cppBridge.setTruthTreeOperator("or", operatorEditOverlay.or);
+		cppBridge.setTruthTreeOperator("xor", operatorEditOverlay.xor);
+		cppBridge.setTruthTreeOperator("impl", operatorEditOverlay.impl);
+		cppBridge.setTruthTreeOperator("eq", operatorEditOverlay.eq);
+		cppBridge.setTruthTreeOperator("not", operatorEditOverlay.not);
+		cppBridge.setTruthTreeOperator("tempU", operatorEditOverlay.tempU);
+		cppBridge.setTruthTreeOperator("tempX", operatorEditOverlay.tempX);
+		cppBridge.setTruthTreeOperator("tempG", operatorEditOverlay.tempG);
+		cppBridge.setTruthTreeOperator("tempF", operatorEditOverlay.tempF);
 	}
 }
