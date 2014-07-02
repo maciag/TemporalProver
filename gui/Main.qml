@@ -1,13 +1,87 @@
 import QtQuick 2.2
 import QtQuick.Controls 1.1
-import QtQuick.Layouts 1.1	
+import QtQuick.Layouts 1.1
+
+import QtQuick.Dialogs 1.0
+
+import CppBridge 1.0
 
 ApplicationWindow
 {
+	id: main;
+	
 	title: "Prover";
 	width: 800;
 	height: 600;
 	visible: true;
+	
+	property string ioMode;
+	property TextArea ioTargetComponent;
+	
+	property FileDialog openDialog: FileDialog
+	{
+		id: loadDialog;
+		title: "Wczytaj formułę";
+		selectExisting: true;
+		selectMultiple: false;
+		nameFilters: [ "Pliki tekstowe (*.txt)" ];
+		
+		onAccepted:
+		{
+			if(ioMode == "formula")
+			{
+				ioTargetComponent.text = cppBridge.loadFile(fileUrl);
+			}
+			
+			else if(ioMode == "data")
+			{
+				var lines = cppBridge.loadFile(fileUrl).split("\n");
+				var mode = "";
+				
+				conclusionLabel.text = "0";
+				predList.model.clear();
+				
+				for(var i = 0; i < lines.length; i++)
+				{
+					if(lines[i] == "")
+						continue;
+					
+					if(lines[i] == "[PRED]")
+						mode = "pred";
+					
+					else if(lines[i] == "[CONC]")
+						mode = "conc";
+					
+					else if(mode == "pred")
+					{
+						predList.model.append({value: lines[i]});
+					}
+					
+					else if(mode == "conc")
+					{
+						conclusionLabel.text = lines[i];
+						return;  // Wczytuj tylko pierwszą konkluzję
+					}
+				}
+				
+				generateExpressionTree("");
+			}
+		}
+	}
+	
+	property FileDialog saveDialog: FileDialog
+	{
+		id: saveDialog;
+		title: "Zapisz formułę";
+		selectExisting: false;
+		selectMultiple: false;
+		nameFilters: [ "Pliki tekstowe (*.txt)" ];
+		
+		onAccepted:
+		{
+			cppBridge.saveFile(fileUrl, ioTargetComponent.text);
+		}
+	}
 	
 	// Układ i podkomponeny
 	RowLayout
@@ -75,7 +149,12 @@ ApplicationWindow
 				onClicked:
 				{
 					tabs.currentIndex = 1;
-					generateExpressionTree(model.get(currentRow).value);
+					
+					if(currentRow >= 0)
+						generateExpressionTree(model.get(currentRow).value);
+					
+					else
+						generateExpressionTree("");
 				}
 			}
 			
@@ -148,6 +227,12 @@ ApplicationWindow
 				{
 					iconSource: "img/load.svg";
 					tooltip: "Wczytaj z pliku";
+					
+					onClicked:
+					{
+						ioMode = "data";
+						loadDialog.visible = true;
+					}
 				}
 			}
 			

@@ -134,6 +134,29 @@ void QmlBridge::clearParserOperators()
 	clearOperators_C();
 }
 
+QString QmlBridge::loadFile(QUrl file)
+{
+	QFile f(file.toLocalFile());
+	
+	if(!f.open(QFile::ReadOnly | QFile::Text))
+		return QString("");
+	
+	QTextStream in(&f);
+	return in.readAll();
+}
+
+void QmlBridge::saveFile(QUrl file, QString content)
+{
+	QFile f(file.toLocalFile());
+	
+	if(!f.open(QFile::WriteOnly | QFile::Truncate))
+		return;
+	
+	QTextStream out(&f);
+	out << content;
+	f.close();
+}
+
 void initGUI()
 {
 	int argc = 0;

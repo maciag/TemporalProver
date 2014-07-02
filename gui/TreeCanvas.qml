@@ -20,17 +20,22 @@ Canvas
 	MouseArea
 	{
 		anchors.fill: parent;
+		acceptedButtons: Qt.LeftButton;
 		
 		onClicked:
 		{
-			var x = Math.floor((mouse.x - margin) / 20);
-			var y = Math.floor(((mouse.y - margin) / 40) - ((((mouse.y - margin) % 40) > 20) ? 1000000 : 0));  // Między wierszami skieruj na brak węzła
 			
-			for(var i = 0; i < nodes.length; i++)
+			if(mouse.button == Qt.LeftButton)
 			{
-				if(nodes[i].x == x && nodes[i].y == y)
+				var x = Math.floor((mouse.x - margin) / 20);
+				var y = Math.floor(((mouse.y - margin) / 40) - ((((mouse.y - margin) % 40) > 20) ? 1000000 : 0));  // Między wierszami skieruj na brak węzła
+				
+				for(var i = 0; i < nodes.length; i++)
 				{
-					nodeClicked(nodes[i].token, nodes[i].value);
+					if(nodes[i].x == x && nodes[i].y == y)
+					{
+						nodeClicked(nodes[i].token, nodes[i].value);
+					}
 				}
 			}
 		}

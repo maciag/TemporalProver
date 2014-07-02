@@ -1,5 +1,6 @@
 import QtQuick 2.2
 import QtQuick.Controls 1.1
+import QtQuick.Dialogs 1.1
 import QtQuick.Layouts 1.1
 
 import CppBridge 1.0
@@ -18,7 +19,9 @@ Overlay
 		tooltip: "Wczytaj z pliku";
 		onClicked:
 		{
-			// TODO Wczytanie operatorów z pliku
+			main.ioMode = "formula";
+			main.ioTargetComponent = formulaArea;
+			loadDialog.visible = true;
 		}
 	},
 	

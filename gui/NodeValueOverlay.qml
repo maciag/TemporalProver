@@ -9,7 +9,19 @@ Overlay
 	id: nodeValueOverlay;
 	title: "Podgląd węzła";
 	
-	dialogButtons: []
+	dialogButtons: [
+	ToolButton
+	{
+		iconSource: "img/save.svg";
+		tooltip: "Zapisz do pliku";
+		onClicked:
+		{
+			main.ioMode = "formula";
+			main.ioTargetComponent = formulaArea;
+			saveDialog.visible = true;
+		}
+	}
+	]
 	
 	TextArea
 	{

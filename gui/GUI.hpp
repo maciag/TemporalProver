@@ -52,6 +52,9 @@ class QmlBridge : public QObject
 	
 	Q_INVOKABLE void setParserOperator(QString symbol, int precedence, bool unary);
 	Q_INVOKABLE void clearParserOperators();
+	
+	Q_INVOKABLE QString loadFile(QUrl file);
+	Q_INVOKABLE void saveFile(QUrl file, QString content);
 };
 
 // GUI
