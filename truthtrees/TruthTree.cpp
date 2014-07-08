@@ -220,9 +220,9 @@ string TruthTree::toFormattedString() {
 	tree<FormulaNode>::iterator it = mainTree.begin();
 	string formattedString;
 	while (it != mainTree.end()) {
-		formattedString.append((*it).toFormattedString() + "t");
+		formattedString.append((*it).toFormattedString() + "\t");
 		if (mainTree.number_of_siblings(it) == 1)
-			formattedString.append("t");
+			formattedString.append("\t");
 		++it;
 	}
 	return formattedString;
