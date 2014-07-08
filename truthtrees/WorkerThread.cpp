@@ -12,6 +12,22 @@ WorkerThread::WorkerThread(string formula) :
 
 void WorkerThread::run() {
 
+	while (truthTree.decomposeStep()) {
+		stopLock.lock();
+		if (stop)
+			return;
+		stopLock.unlock();
+		emit stepDone(truthTree.toFormattedString());
+	}
+	truthTree.eliminateNodes();
+	stopLock.lock();
+	if (stop)
+		return;
+	stopLock.unlock();
+	emit stepDone(truthTree.toFormattedString());
+
+	emit AllDone(truthTree.toFormattedString, truthTree.getResult());
+
 }
 
 WorkerThread::startComputation() {
@@ -22,6 +38,8 @@ WorkerThread::startComputation() {
 
 WorkerThread::abortComputation() {
 
-
+	stopLock.lock();
+	stop = true;
+	stopLock.unlock();
 
 }

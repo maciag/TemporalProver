@@ -11,7 +11,7 @@ class WorkerThread public QThread{
 
 	TruthTree truthTree;
 	bool stop;
-
+	QMutex stopLock;
 	void run();
 
 public:
@@ -23,8 +23,8 @@ public slots:
 	abortComputation();
 
 signals:
-	stepDone();
-	allDone();
+	stepDone(string forrmatedTree);
+	allDone(string forrmatedTree, bool result);
 
 };
 
