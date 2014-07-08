@@ -12,6 +12,9 @@ class TruthTree {
 	tree<FormulaNode>::iterator root;
 	tree<FormulaNode>::iterator currentNode;
 
+	tree<FormulaNode>::iterator findFormula(StringFormula formula);
+	bool existsPath(tree<FormulaNode>::iterator it1, tree<FormulaNode>::iterator it2);
+
 public:
 
 	TruthTree(string formula);
@@ -21,6 +24,8 @@ public:
 
 	void decomposeAll();
 	bool decomposeStep();
+	void eliminateNodes();
+	bool getResult();
 
 	string toFormattedString();
 

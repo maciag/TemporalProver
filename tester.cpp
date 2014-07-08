@@ -67,25 +67,41 @@ int main() {
 	}
 
 	TruthTree truthTree(root);
-	/*int idx = 0;
-	 do {
-	 cout << idx << endl;
-	 cout << truthTree;
-	 cout << endl;
-	 idx++;
-	 } while (truthTree.decomposeStep());*/
-
-	for (int i = 0; i < 12; i++) {
-		cout << i << endl;
+	int idx = 0;
+	do {
+		cout << idx << endl;
 		cout << truthTree;
 		cout << endl;
-		truthTree.decomposeStep();
-	}
+		idx++;
+	} while (truthTree.decomposeStep());
+
+	idx++;
+	cout << idx << endl;
+	cout << truthTree;
+	cout << endl;
+
+	idx++;
+	truthTree.eliminateNodes();
+	cout << idx << endl;
+	cout << truthTree;
+	cout << endl;
+
+	/*for (int i = 0; i < 6; i++) {
+	 cout << i << endl;
+	 cout << truthTree;
+	 cout << endl;
+	 truthTree.decomposeStep();
+	 }*/
 
 	string stringForm = truthTree.toFormattedString();
 
 	cout << endl << "W postaci sformatowanego stringa" << endl << stringForm
 			<< endl;
+
+	if (truthTree.getResult())
+		cout << "Formuła wejściowa spełnialna" << endl;
+	else
+		cout << "Formuła wejściowa niespełnialna" << endl;
 
 	return 0;
 }

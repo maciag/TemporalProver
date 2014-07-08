@@ -54,6 +54,12 @@ StringFormula::StringFormula(vector<string> symbolArray) :
 
 }
 
+StringFormula::StringFormula() {
+	symbolArray.reserve(100);
+	tokenArray.reserve(100);
+	type = decomposeType::none;
+}
+
 void StringFormula::evalDecompositionType() {
 
 	// Przypadki, dla których nie jest wykonywana dalsza dekompozycja
@@ -139,6 +145,10 @@ void StringFormula::evalDecompositionType() {
 
 	case token::talw:
 		type = decomposeType::stacking;
+		break;
+
+	case token::tnext:
+		type = decomposeType::next;
 		break;
 
 	default:
@@ -439,6 +449,23 @@ StringFormula StringFormula::subFormula(int begin, int end) {
 	return StringFormula(trimmedSymbolArray);
 }
 
+bool StringFormula::isPreposition() {
+	return tokenArray[0] == token::tvar;
+}
+
+bool StringFormula::isPrepositionNegation(StringFormula other) {
+	return tokenArray[1] == token::tvar && tokenArray[0] == token::tneg
+			&& other.tokenArray[0] == token::tvar
+			&& other.symbolArray[0] == symbolArray[1];
+}
+
+bool StringFormula::isEmpty() {
+	if (symbolArray.size() > 0)
+		return false;
+	else
+		return true;
+}
+
 ostream& operator<<(ostream& os, const StringFormula& stringFormula) {
 
 	/*os << stringFormula.rawContent << "   " << stringFormula.inflixContent
@@ -474,8 +501,65 @@ ostream& operator<<(ostream& os, const StringFormula& stringFormula) {
 	return os;
 }
 
+bool StringFormula::operator==(const StringFormula &other) const {
+
+	if (symbolArray.size() != other.symbolArray.size())
+		return false;
+	for (int i = 0; i < symbolArray.size(); i++)
+		if (symbolArray[i] != other.symbolArray[i])
+			return false;
+	return true;
+}
+
+bool StringFormula::operator!=(const StringFormula &other) const {
+
+	return !(*this == other);
+
+}
+
+StringFormula StringFormula::nextFormula() {
+
+	if (tokenArray.size() > 0 && tokenArray[0] == token::tnext) {
+		vector<string> newSymbolArray(symbolArray);
+		newSymbolArray.erase(newSymbolArray.begin());
+		return StringFormula(newSymbolArray);
+	}
+	return StringFormula();
+}
+
 StringFormula::decomposeType StringFormula::getType() {
 	return type;
+}
+
+StringFormula StringFormula::needSatisfaction() {
+
+	if (tokenArray[0] == token::tfin) {
+		vector<string> newSymbolArray(symbolArray);
+		newSymbolArray.erase(newSymbolArray.begin());
+		return StringFormula(newSymbolArray);
+	}
+	if (tokenArray[1] == token::tunt) {
+		int idx = 0, counter = 1;
+
+		while (counter != 0) {
+			idx++;
+			if (tokenArray[idx] == token::tvar)
+				counter--;
+			else {
+				if (tokenArray[idx] != token::tneg
+						&& tokenArray[idx] != token::tnext
+						&& tokenArray[idx] != token::tfin
+						&& tokenArray[idx] != token::talw)
+					counter++;
+			}
+		}
+
+		int begin = 1, end = idx + 1;
+		return subFormula(begin, end);
+	}
+
+	return StringFormula();
+
 }
 
 StringFormula StringFormula::compose(StringFormula left, token op,

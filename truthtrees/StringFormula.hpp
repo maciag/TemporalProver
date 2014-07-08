@@ -17,11 +17,12 @@ class StringFormula {
 public:
 
 	enum decomposeType {
-		branching = 0, stacking, branching_stacking, branching_substacking, single, none, error
+		branching = 0, stacking, branching_stacking, branching_substacking, single, next, none, error
 	};
 
 	StringFormula(string content);
 	StringFormula(vector<string> symbolTable);
+	StringFormula();
 	~StringFormula();
 
 	string getRaw();
@@ -29,8 +30,15 @@ public:
 	vector<string> getSymbolArray();
 	bool decompose(vector<StringFormula> &elements);
 	decomposeType getType();
+	bool isPreposition();
+	bool isPrepositionNegation(StringFormula other);
+	StringFormula nextFormula();
+	bool isEmpty();
+	StringFormula needSatisfaction();
 
 	friend ostream& operator<<(ostream& os, const StringFormula& stringFormula);
+	bool operator==(const StringFormula &other) const;
+	bool operator!=(const StringFormula &other) const;
 
 	static vector<string> splitString(const string& s, const string& delim,
 				const bool keep_empty = true);
@@ -52,6 +60,7 @@ private:
 	string getSymbol(int idx);
 	void pushOperatorFront(token op);
 	void negate();
+
 
 	static StringFormula compose(StringFormula left, token op, StringFormula right);
 
