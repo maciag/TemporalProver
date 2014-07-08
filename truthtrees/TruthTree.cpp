@@ -88,7 +88,8 @@ bool TruthTree::decomposeStep() {
 					currentNode->setAllChecked(true);
 					break;
 				}
-				node = mainTree.parent(node);;
+				node = mainTree.parent(node);
+				;
 			}
 
 			if (currentNode->getFeedbackPath() == NULL) {
@@ -191,10 +192,10 @@ tree<FormulaNode>::iterator TruthTree::findFormula(StringFormula formula) {
 	return it;
 }
 
-bool TruthTree::existsPath(tree<FormulaNode>::iterator it1, tree<FormulaNode>::iterator it2) {
+bool TruthTree::existsPath(tree<FormulaNode>::iterator it1,
+		tree<FormulaNode>::iterator it2) {
 	tree<FormulaNode>::iterator currentIt(it1);
 	while (currentIt != mainTree.end()) {
-
 
 		if (it1 == it2)
 			return false;
@@ -216,16 +217,47 @@ bool TruthTree::getResult() {
 	return !root->isEliminated();
 }
 
-string TruthTree::toFormattedString() {
-	tree<FormulaNode>::iterator it = mainTree.begin();
-	string formattedString;
-	while (it != mainTree.end()) {
-		formattedString.append((*it).toFormattedString() + "\t");
-		if (mainTree.number_of_siblings(it) == 1)
-			formattedString.append("\t");
-		++it;
+string TruthTree::nodeToFormattedString(tree<FormulaNode>::iterator it) {
+
+	if (it == mainTree.end())
+		return "";
+
+	string nodeString = it->toFormattedString();
+
+	//if(mainTree.number_of_children(it) == 0)
+	//	return nodeString;
+
+	if (mainTree.number_of_children(it) == 0) {
+		nodeString.append("\t\t");
 	}
-	return formattedString;
+
+	else if (mainTree.number_of_children(it) == 1) {
+		nodeString.append("\t");
+		nodeString.append(nodeToFormattedString(mainTree.child(it, 0)));
+		nodeString.append("\t");
+	}
+
+	else if (mainTree.number_of_children(it) == 2) {
+		nodeString.append("\t");
+		nodeString.append(nodeToFormattedString(mainTree.child(it, 0)));
+		nodeString.append("\t");
+		nodeString.append(nodeToFormattedString(mainTree.child(it, 1)));
+	}
+
+	return nodeString;
+
+}
+
+string TruthTree::toFormattedString() {
+	/*tree<FormulaNode>::iterator it = mainTree.end();
+	 string formattedString;
+	 while (it != mainTree.begin()) {
+	 formattedString.append((*it).toFormattedString() + "t");
+	 if (mainTree.number_of_siblings(it) == 1)
+	 formattedString.append("t");
+	 --it;
+	 }*/
+	return nodeToFormattedString(root);
 }
 
 ostream& operator<<(ostream& os, const TruthTree& truthTree) {

@@ -14,6 +14,7 @@ class TruthTree {
 
 	tree<FormulaNode>::iterator findFormula(StringFormula formula);
 	bool existsPath(tree<FormulaNode>::iterator it1, tree<FormulaNode>::iterator it2);
+	string nodeToFormattedString(tree<FormulaNode>::iterator it);
 
 public:
 
