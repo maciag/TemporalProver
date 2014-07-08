@@ -199,8 +199,10 @@ void FormulaNode::setAllChecked(bool value) {
 
 string FormulaNode::toFormattedString() {
 	string formattedString;
-	for (int i = 0; i < formulas.size(); i++) {
-		formattedString.append(formulas[i].getRaw() + "; ");
+	if (formulas.size() > 0)
+			formattedString.append(formulas[0].getRaw());
+	for (int i = 1; i < formulas.size(); i++) {
+		formattedString.append("; " + formulas[i].getRaw());
 	}
 	return formattedString;
 }
@@ -261,8 +263,10 @@ bool FormulaNode::contains(StringFormula formula) {
 
 ostream& operator<<(ostream& os, const FormulaNode& formulaNode) {
 
-	for (int i = 0; i < formulaNode.formulas.size(); i++) {
-		os << formulaNode.formulas[i] << "; ";
+	if (formulaNode.formulas.size() > 0)
+		os << formulaNode.formulas[0];
+	for (int i = 1; i < formulaNode.formulas.size(); i++) {
+		os << "; " << formulaNode.formulas[i];
 	}
 	os << "    eliminated: " << formulaNode.eliminated << "    all checked: " << formulaNode.allChecked;
 	return os;
