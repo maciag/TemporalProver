@@ -67,7 +67,7 @@ public void resetOperators()
 	setOperator("^", 3, false);
 	setOperator(">", 2, false);
 	setOperator("=", 1, false);
-	setOperator("!", 6, true);
+	setOperator("!", 5, true);
 	setOperator("U", 4, false);
 	setOperator("X", 5, true);
 	setOperator("G", 5, true);
@@ -146,19 +146,20 @@ bool isOperator(char[] s)
  */
 bool hasNotLowerPrecedence(char[] op1, char[] op2)
 {
-	if(op1 == op2)
-		return !operators[op1].unary;
-	
-	else
+	// Przy równym priorytecie sprawdzamy, czy pierwszy jest unarny (w praktyce oba muszą być - inaczej formuła jest niepoprawna)
+	try
 	{
-		try
+		if(operators[op1].precedence == operators[op2].precedence)
+			return !operators[op1].unary;
+		
+		else
 		{
 			return operators[op1].precedence >= operators[op2].precedence;
 		}
-		catch(RangeError)  // Pewnie któryś jest nawiasem
-		{
-			return false;
-		}
+	}
+	catch(RangeError)  // Pewnie któryś jest nawiasem
+	{
+		return false;
 	}
 }
 
