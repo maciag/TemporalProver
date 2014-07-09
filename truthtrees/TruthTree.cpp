@@ -419,7 +419,7 @@ bool TruthTree::changeOperator(token op, string symbol) {
 	return true;
 }
 
-static void TruthTree::resetOperators() {
+void TruthTree::resetOperators() {
 
 	tokenMap.clear();
 	symbolMap.clear();
