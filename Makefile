@@ -2,7 +2,7 @@ all: prover tester
 
 tester: tester.cpp prover
 	g++ -std=c++11 -c -o obj/tester.o tester.cpp
-	dmd -oftester lib/functions.a obj/tester.o obj/TruthTree.o obj/StringFormula.o obj/LexicalTable.o obj/FormulaNode.o obj/GUI.o obj/moc_GUI.o -L-lstdc++ -L-lQt5Core -L-lQt5Gui -L-lQt5Quick -L-lQt5Qml -L-lQt5Widgets -L-lstdc++
+	dmd -oftester lib/functions.a obj/tester.o obj/TruthTree.o obj/StringFormula.o obj/LexicalTable.o obj/FormulaNode.o obj/GUI.o obj/moc_GUI.o obj/WorkerThread.o obj/moc_WorkerThread.o -L-lstdc++ -L-lQt5Core -L-lQt5Gui -L-lQt5Quick -L-lQt5Qml -L-lQt5Widgets -L-lstdc++
 	
 prover: main.cpp truthtrees/TruthTree.cpp truthtrees/FormulaNode.cpp truthtrees/StringFormula.cpp truthtrees/LexicalTable.cpp  lib/functions.a obj/GUI.o obj/WorkerThread.o
 	g++ -std=c++11 -c -o obj/LexicalTable.o truthtrees/LexicalTable.cpp 
