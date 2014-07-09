@@ -26,17 +26,17 @@ void WorkerThread::run() {
 	stopLock.unlock();
 	emit stepDone(truthTree.toFormattedString());
 
-	emit AllDone(truthTree.toFormattedString, truthTree.getResult());
+	emit allDone(truthTree.toFormattedString(), truthTree.getResult());
 
 }
 
-WorkerThread::startComputation() {
+void WorkerThread::startComputation() {
 
 	this->start();
 
 }
 
-WorkerThread::abortComputation() {
+void WorkerThread::abortComputation() {
 
 	stopLock.lock();
 	stop = true;

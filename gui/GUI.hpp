@@ -55,6 +55,12 @@ class QmlBridge : public QObject
 	
 	Q_INVOKABLE QString loadFile(QUrl file);
 	Q_INVOKABLE void saveFile(QUrl file, QString content);
+	
+	Q_INVOKABLE void startComputation(QStringList predList, QString conc);
+	Q_INVOKABLE void abortComputation();
+	
+	signals:
+	void computationFinished(QString resTree);
 };
 
 // GUI

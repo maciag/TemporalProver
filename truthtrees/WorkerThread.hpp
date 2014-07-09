@@ -6,7 +6,7 @@
 #include "StringFormula.hpp"
 #include "TruthTree.hpp"
 
-class WorkerThread public QThread{
+class WorkerThread : public QThread{
 	Q_OBJECT
 
 	TruthTree truthTree;
@@ -19,12 +19,12 @@ public:
 	WorkerThread(string formula);
 
 public slots:
-	startComputation();
-	abortComputation();
+	void startComputation();
+	void abortComputation();
 
 signals:
-	stepDone(string forrmatedTree);
-	allDone(string forrmatedTree, bool result);
+	void stepDone(string forrmatedTree);
+	void allDone(string forrmatedTree, bool result);
 
 };
 

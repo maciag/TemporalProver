@@ -1,6 +1,9 @@
 #include "GUI.hpp"
 
+#include "../truthtrees/WorkerThread.hpp"
+
 #include <iostream>
+#include <sstream>
 using namespace std;
 
 bool QmlBridge::validate(QString formula)
@@ -155,6 +158,29 @@ void QmlBridge::saveFile(QUrl file, QString content)
 	QTextStream out(&f);
 	out << content;
 	f.close();
+}
+
+void QmlBridge::startComputation(QStringList predList, QString conc)
+{
+	stringstream stream;
+	
+	for(int i = 0; i < predList.size(); i++)
+	{
+		stream << predList[i].toUtf8().data() << "; ";
+	}
+	
+	stream << conc.toUtf8().data();
+	
+	string formula = stream.str();
+	
+	// Stworzenie wątku
+	WorkerThread *thread = new WorkerThread(formula);
+	thread->startComputation();
+}
+
+void QmlBridge::abortComputation()
+{
+	
 }
 
 void initGUI()

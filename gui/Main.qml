@@ -307,6 +307,18 @@ ApplicationWindow
 			{
 				implicitWidth: 200;
 				text: "Rozłóż";
+				
+				onClicked:
+				{
+					var preds = [];
+					
+					for(var i = 0; i < predList.rowCount; i++)
+					{
+						preds.push(predList.model.get(i).value);
+					}
+					
+					cppBridge.startComputation(preds, conclusionLabel.text);
+				}
 			}
 			
 			RowLayout
@@ -318,7 +330,7 @@ ApplicationWindow
 					iconSource: "img/zoomIn.svg";
 					tooltip: "Powiększ";
 					
-					onClicked:  // TODO: do poprawy!
+					onClicked:
 					{
 						var currentTree = tabs.getTab(tabs.currentIndex).children[0].contentItem;
 						
@@ -338,7 +350,7 @@ ApplicationWindow
 					iconSource: "img/zoomOut.svg";
 					tooltip: "Pomniejsz";
 					
-					onClicked: // TODO: do poprawy!
+					onClicked:
 					{
 						var currentTree = tabs.getTab(tabs.currentIndex).children[0].contentItem;
 						
