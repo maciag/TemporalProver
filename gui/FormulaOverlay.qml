@@ -12,6 +12,9 @@ Overlay
 	id: formulaOverlay;
 	title: "Edycja formuły";
 	
+	dialogWidth: 480;
+	dialogHeight: 320;
+	
 	dialogButtons: [
 	ToolButton
 	{

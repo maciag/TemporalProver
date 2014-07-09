@@ -23,8 +23,8 @@ public slots:
 	void abortComputation();
 
 signals:
-	void stepDone(string forrmatedTree);
-	void allDone(string forrmatedTree, bool result);
+	void stepDone(QString forrmatedTree);
+	void allDone(QString forrmatedTree, bool result);
 
 };
 

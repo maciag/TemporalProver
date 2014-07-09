@@ -9,6 +9,9 @@ Overlay
 	id: nodeValueOverlay;
 	title: "Podgląd węzła";
 	
+	dialogWidth: 480;
+	dialogHeight: 320;
+	
 	dialogButtons: [
 	ToolButton
 	{
@@ -28,6 +31,7 @@ Overlay
 		id: formulaArea;
 		readOnly: true;
 		anchors.fill: parent;
+		textFormat: TextEdit.RichText;
 	}
 	
 	function getFormula()

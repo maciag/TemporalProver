@@ -160,27 +160,23 @@ void QmlBridge::saveFile(QUrl file, QString content)
 	f.close();
 }
 
-void QmlBridge::startComputation(QStringList predList, QString conc)
+void QmlBridge::startComputation(QString formula)
 {
-	stringstream stream;
+	workerThread = new WorkerThread(formula.toUtf8().data());
 	
-	for(int i = 0; i < predList.size(); i++)
-	{
-		stream << predList[i].toUtf8().data() << "; ";
-	}
-	
-	stream << conc.toUtf8().data();
-	
-	string formula = stream.str();
-	
-	// Stworzenie wątku
-	WorkerThread *thread = new WorkerThread(formula);
-	thread->startComputation();
+	connect(workerThread, SIGNAL(allDone(QString, bool)), this, SLOT(threadFinished(QString, bool)));
+	workerThread->startComputation();
 }
 
 void QmlBridge::abortComputation()
 {
-	
+	workerThread->abortComputation();
+}
+
+void QmlBridge::threadFinished(QString resTree, bool result)
+{
+	// Obiekt główny w QML-u tworzę tylko jeden, więc już go nie szukam po nazwie.
+	QMetaObject::invokeMethod(engine->rootObjects()[0], "handleResults", Q_ARG(QVariant, resTree), Q_ARG(QVariant, result));
 }
 
 void initGUI()
@@ -193,8 +189,8 @@ void initGUI()
 	QmlBridge::declareQML();
 	QmlBridge *bridge = new QmlBridge();
 	
-	QQmlApplicationEngine *engine = new QQmlApplicationEngine("gui/Main.qml");
-	engine->rootContext()->setContextProperty("cppBridge", bridge);
+	bridge->engine = new QQmlApplicationEngine("gui/Main.qml");
+	bridge->engine->rootContext()->setContextProperty("cppBridge", bridge);
 	
 	app->exec();
 }

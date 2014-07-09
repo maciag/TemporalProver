@@ -33,7 +33,7 @@ ApplicationWindow
 				ioTargetComponent.text = cppBridge.loadFile(fileUrl);
 			}
 			
-			else if(ioMode == "data")
+/*			else if(ioMode == "data")
 			{
 				var lines = cppBridge.loadFile(fileUrl).split("\n");
 				var mode = "";
@@ -66,7 +66,7 @@ ApplicationWindow
 				
 				generateExpressionTree("");
 			}
-		}
+*/		}
 	}
 	
 	property FileDialog saveDialog: FileDialog
@@ -126,7 +126,7 @@ ApplicationWindow
 		{
 			Layout.alignment: Qt.AlignTop | Qt.AlignLeft;
 			
-			HeaderLabel
+/*			HeaderLabel
 			{
 				text: "Predykaty";
 			}
@@ -235,10 +235,10 @@ ApplicationWindow
 					}
 				}
 			}
-			
+*/			
 			HeaderLabel
 			{
-				text: "Konkluzja";
+				text: "Formuła";
 			}
 			
 			RowLayout
@@ -257,7 +257,7 @@ ApplicationWindow
 						anchors.fill: parent;
 						onClicked:
 						{
-							predList.selection.clear();
+//							predList.selection.clear();
 							generateExpressionTree(conclusionLabel.text);
 							tabs.currentIndex = 1;
 						}
@@ -300,6 +300,7 @@ ApplicationWindow
 			
 			Label
 			{
+				id: resultLabel;
 				text: "Nie obliczono";
 			}
 			
@@ -310,14 +311,15 @@ ApplicationWindow
 				
 				onClicked:
 				{
-					var preds = [];
+/*					var preds = [];
 					
 					for(var i = 0; i < predList.rowCount; i++)
 					{
 						preds.push(predList.model.get(i).value);
 					}
 					
-					cppBridge.startComputation(preds, conclusionLabel.text);
+*/					progressOverlay.visible = true;
+					cppBridge.startComputation(conclusionLabel.text);
 				}
 			}
 			
@@ -377,15 +379,50 @@ ApplicationWindow
 	
 	// Overlay'e dialogowe
 	FormulaOverlay { id: formulaOverlay; }
-	ProgressOverlay { id: progressOverlay; }
+	
+	ProgressOverlay
+	{
+		id: progressOverlay;
+		onCancel: cppBridge.abortComputation();
+	}
+	
 	NodeValueOverlay { id: nodeValueOverlay; }
+	
 	OperatorEditOverlay
 	{
 		id: operatorEditOverlay;
 		onSave: updateOperators();
 	}
 	
-	// Funkcje dotyczące predykatów
+	function handleResults(resTree, result)
+	{
+		// Ustawiamy etykietę z wynikiem
+		resultLabel.text = (result ? "spełnialne" : "niespełnialne");
+		
+		// Generujemy drzewo prawdy
+		var tree = truthTreeTab.children[0].contentItem;
+		
+		if(tree.canvas != null)
+		{
+			tree.canvas.update();
+			tree.canvas.destroy();
+			tree.canvas = null;
+		}
+		
+		if(resTree != "")
+			tree.setResult(resTree);
+		else
+			tree.setResult("");
+		
+		if(tree.canvas != null)
+			tree.canvas.nodeClicked.connect(nodePreview);
+		
+		// Ukrywamy nakładkę postępu i zmieniamy zakładkę
+		progressOverlay.visible = false;
+		tabs.currentIndex = 0;
+	}
+	
+	/*	// Funkcje dotyczące predykatów
 	function appendPred(formula)
 	{
 		predList.model.append({value: formula});
@@ -407,12 +444,13 @@ ApplicationWindow
 		
 		formulaOverlay.save.disconnect(updatePred);  // Odłączamy od razu sygnał
 	}
-	
+*/
 	function editConc(formula)
 	{
 		conclusionLabel.text = formula;
 		
-		predList.selection.clear();
+//		predList.selection.clear();
+		resultLabel.text = "Nie obliczono";
 		generateExpressionTree(formula);
 		tabs.currentIndex = 1;
 		
@@ -456,7 +494,7 @@ ApplicationWindow
 		cppBridge.setParserOperator(operatorEditOverlay.xor, 3, false);
 		cppBridge.setParserOperator(operatorEditOverlay.impl, 2, false);
 		cppBridge.setParserOperator(operatorEditOverlay.eq, 1, false);
-		cppBridge.setParserOperator(operatorEditOverlay.not, 6, true);
+		cppBridge.setParserOperator(operatorEditOverlay.not, 5, true);
 		cppBridge.setParserOperator(operatorEditOverlay.tempU, 4, false);
 		cppBridge.setParserOperator(operatorEditOverlay.tempX, 5, true);
 		cppBridge.setParserOperator(operatorEditOverlay.tempG, 5, true);

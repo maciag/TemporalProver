@@ -1,5 +1,0 @@
-[PRED]
-a&b > c
-!a = !(b^c)
-[CONC]
-a = !c

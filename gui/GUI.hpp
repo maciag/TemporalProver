@@ -9,6 +9,7 @@
 #include <QUrl>
 
 #include <../functions/prefix.h>
+#include <../truthtrees/WorkerThread.hpp>
 #include <../truthtrees/LexicalTable.hpp>
 
 /**
@@ -19,6 +20,9 @@ class QmlBridge : public QObject
 	Q_OBJECT
 	
 	public:
+	QQmlApplicationEngine *engine;
+	WorkerThread *workerThread;
+	
 	enum ErrorCode
 	{
 		OK,
@@ -56,8 +60,11 @@ class QmlBridge : public QObject
 	Q_INVOKABLE QString loadFile(QUrl file);
 	Q_INVOKABLE void saveFile(QUrl file, QString content);
 	
-	Q_INVOKABLE void startComputation(QStringList predList, QString conc);
+	Q_INVOKABLE void startComputation(QString formula);
 	Q_INVOKABLE void abortComputation();
+	
+	public slots:
+	void threadFinished(QString resTree, bool result);
 	
 	signals:
 	void computationFinished(QString resTree);

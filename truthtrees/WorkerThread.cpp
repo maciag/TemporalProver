@@ -17,16 +17,16 @@ void WorkerThread::run() {
 		if (stop)
 			return;
 		stopLock.unlock();
-		emit stepDone(truthTree.toFormattedString());
+		emit stepDone(QString::fromStdString(truthTree.toFormattedString()));
 	}
 	truthTree.eliminateNodes();
 	stopLock.lock();
 	if (stop)
 		return;
 	stopLock.unlock();
-	emit stepDone(truthTree.toFormattedString());
+	emit stepDone(QString::fromStdString(truthTree.toFormattedString()));
 
-	emit allDone(truthTree.toFormattedString(), truthTree.getResult());
+	emit allDone(QString::fromStdString(truthTree.toFormattedString()), truthTree.getResult());
 
 }
 
