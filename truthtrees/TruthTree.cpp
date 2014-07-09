@@ -219,23 +219,26 @@ bool TruthTree::decomposeStep() {
 void TruthTree::eliminateNodes() {
 	tree<FormulaNode>::pre_order_iterator it(mainTree.begin());
 
+	bool eliminated = false;
+
 	while (it != mainTree.end()) {
 
 		if (!it->isEliminated() && it.number_of_children() != 0) {
 
-			tree<FormulaNode>::sibling_iterator sibIt = mainTree.child(it, 0);
+			//tree<FormulaNode>::sibling_iterator sibIt = mainTree.child(it, 0);
 			bool allEliminated = true;
 
-			for (int i = 0; i < mainTree.number_of_siblings(sibIt); i++) {
-				if (!sibIt->isEliminated()) {
+			for (int i = 0; i < mainTree.number_of_children(it); i++) {
+				if (!(mainTree.child(it, i)->isEliminated())) {
 					allEliminated = false;
 					break;
 				}
 			}
 
-			if (allEliminated)
+			if (allEliminated) {
 				it->setEliminated();
-
+				eliminated = true;
+			}
 		}
 
 		if (!it->isEliminated()) {
@@ -245,6 +248,7 @@ void TruthTree::eliminateNodes() {
 				tree<FormulaNode>::iterator matchIt = findFormula(toSatisfy[i]);
 				if (matchIt == mainTree.end() || !existsPath(it, matchIt)) {
 					it->setEliminated();
+					eliminated = true;
 					break;
 				}
 			}
@@ -254,6 +258,8 @@ void TruthTree::eliminateNodes() {
 
 	}
 
+	if (eliminated)
+		eliminateNodes();
 }
 
 tree<FormulaNode>::iterator TruthTree::findFormula(StringFormula formula) {

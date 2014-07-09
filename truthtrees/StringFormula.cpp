@@ -522,6 +522,7 @@ StringFormula StringFormula::needSatisfaction() {
 	if (tokenArray[0] == token::tfin) {
 		vector<string> newSymbolArray(symbolArray);
 		newSymbolArray.erase(newSymbolArray.begin());
+		//std::cout << StringFormula(newSymbolArray) << endl;
 		return StringFormula(newSymbolArray);
 	}
 	if (tokenArray[1] == token::tunt) {
@@ -541,6 +542,7 @@ StringFormula StringFormula::needSatisfaction() {
 		}
 
 		int begin = 1, end = idx + 1;
+		//std::cout << subFormula(begin, end) << endl;
 		return subFormula(begin, end);
 	}
 
