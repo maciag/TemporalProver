@@ -16,6 +16,8 @@ int main() {
 	string line;
 	getline(cin, line);
 
+	//TruthTree::changeOperator(token::tand, "*");
+
 	vector<string> subformulas = StringFormula::splitString(line, ";");
 	FormulaNode root;
 

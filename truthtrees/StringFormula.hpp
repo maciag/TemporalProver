@@ -44,8 +44,6 @@ public:
 				const bool keep_empty = true);
 
 private:
-	static map<string, token> tokenMap;
-	static map<token, string> symbolMap;
 
 	string rawContent;
 	string inflixContent;

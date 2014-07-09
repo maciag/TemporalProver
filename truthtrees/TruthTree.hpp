@@ -3,6 +3,7 @@
 #include <string>
 #include <iostream>
 #include "FormulaNode.hpp"
+#include <string.h>
 
 using namespace std;
 
@@ -15,6 +16,7 @@ class TruthTree {
 	tree<FormulaNode>::iterator findFormula(StringFormula formula);
 	bool existsPath(tree<FormulaNode>::iterator it1, tree<FormulaNode>::iterator it2);
 	string nodeToFormattedString(tree<FormulaNode>::iterator it);
+	void initParserOperators();
 
 public:
 
@@ -27,6 +29,9 @@ public:
 	bool decomposeStep();
 	void eliminateNodes();
 	bool getResult();
+
+	static bool changeOperator(token op, string symbol);
+	static void resetOperators();
 
 	string toFormattedString();
 

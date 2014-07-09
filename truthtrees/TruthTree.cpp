@@ -2,6 +2,7 @@
 
 TruthTree::TruthTree(string formula) {
 
+	initParserOperators();
 	root = mainTree.insert(mainTree.begin(), FormulaNode());
 	vector<string> subformulas = StringFormula::splitString(formula, ";");
 	for (int i = 0; i < subformulas.size(); i++)
@@ -12,6 +13,7 @@ TruthTree::TruthTree(string formula) {
 
 TruthTree::TruthTree(char *formula) {
 
+	initParserOperators();
 	root = mainTree.insert(mainTree.begin(), FormulaNode());
 	root->appendFormula(string(toPrefix_C(formula)));
 	currentNode = root;
@@ -20,6 +22,7 @@ TruthTree::TruthTree(char *formula) {
 
 TruthTree::TruthTree(StringFormula formula) {
 
+	initParserOperators();
 	root = mainTree.insert(mainTree.begin(), FormulaNode());
 	root->appendFormula(formula);
 	currentNode = root;
@@ -28,8 +31,81 @@ TruthTree::TruthTree(StringFormula formula) {
 
 TruthTree::TruthTree(FormulaNode formulaNode) {
 
+	initParserOperators();
 	root = mainTree.insert(mainTree.begin(), formulaNode);
 	currentNode = root;
+
+}
+
+void TruthTree::initParserOperators() {
+
+	clearOperators_C();
+
+	for (std::map<token, string>::iterator it = symbolMap.begin();
+			it != symbolMap.end(); ++it) {
+
+		int precendence;
+		bool unary;
+
+		switch (it->first) {
+
+		case token::talw:
+			precendence = 5;
+			unary = true;
+			break;
+
+		case token::tand:
+			precendence = 3;
+			unary = false;
+			break;
+
+		case token::teq:
+			precendence = 1;
+			unary = false;
+			break;
+
+		case token::tfin:
+			precendence = 5;
+			unary = true;
+			break;
+
+		case token::timp:
+			precendence = 2;
+			unary = false;
+			break;
+
+		case token::tneg:
+			precendence = 6;
+			unary = true;
+			break;
+
+		case token::tnext:
+			precendence = 5;
+			unary = true;
+			break;
+
+		case token::tor:
+			precendence = 3;
+			unary = false;
+			break;
+
+		case token::tunt:
+			precendence = 4;
+			unary = false;
+			break;
+
+		case token::txor:
+			precendence = 3;
+			unary = false;
+			break;
+
+		}
+		string symbol = it->second;
+		char *cstr = new char[symbol.length() + 1];
+		strcpy(cstr, symbol.c_str());
+		setOperator_C(cstr, precendence, unary);
+		delete[] cstr;
+	}
 
 }
 
@@ -258,6 +334,121 @@ string TruthTree::toFormattedString() {
 	 --it;
 	 }*/
 	return nodeToFormattedString(root);
+}
+
+bool TruthTree::changeOperator(token op, string symbol) {
+
+	map<token, string>::const_iterator val = symbolMap.find(op);
+
+	if (val == symbolMap.end())
+		return false;
+
+	string oldSymbol = symbolMap[op];
+	symbolMap[op] = symbol;
+
+	tokenMap.erase(oldSymbol);
+	tokenMap[symbol] = op;
+
+	int precendence;
+	bool unary;
+
+	switch (op) {
+
+	case token::talw:
+		precendence = 5;
+		unary = true;
+		break;
+
+	case token::tand:
+		precendence = 3;
+		unary = false;
+		break;
+
+	case token::teq:
+		precendence = 1;
+		unary = false;
+		break;
+
+	case token::tfin:
+		precendence = 5;
+		unary = true;
+		break;
+
+	case token::timp:
+		precendence = 2;
+		unary = false;
+		break;
+
+	case token::tneg:
+		precendence = 6;
+		unary = true;
+		break;
+
+	case token::tnext:
+		precendence = 5;
+		unary = true;
+		break;
+
+	case token::tor:
+		precendence = 3;
+		unary = false;
+		break;
+
+	case token::tunt:
+		precendence = 4;
+		unary = false;
+		break;
+
+	case token::txor:
+		precendence = 3;
+		unary = false;
+		break;
+
+	}
+
+	char *cstr = new char[oldSymbol.length() + 1];
+	strcpy(cstr, oldSymbol.c_str());
+	unsetOperator_C(cstr);
+	delete[] cstr;
+
+	cstr = new char[symbol.length() + 1];
+	strcpy(cstr, symbol.c_str());
+	setOperator_C(cstr, precendence, unary);
+	delete[] cstr;
+
+	return true;
+}
+
+static void TruthTree::resetOperators() {
+
+	tokenMap.clear();
+	symbolMap.clear();
+	clearOperators_C();
+
+	tokenMap["!"] = token::tneg;
+	tokenMap["&"] = token::tand;
+	tokenMap["|"] = token::tor;
+	tokenMap["^"] = token::txor;
+	tokenMap[">"] = token::timp;
+	tokenMap["="] = token::teq;
+	tokenMap["X"] = token::tnext;
+	tokenMap["F"] = token::tfin;
+	tokenMap["U"] = token::tunt;
+	tokenMap["G"] = token::talw;
+
+	symbolMap[token::tneg] = "!";
+	symbolMap[token::tand] = "&";
+	symbolMap[token::tor] = "|";
+	symbolMap[token::txor] = "^";
+	symbolMap[token::timp] = ">";
+	symbolMap[token::teq] = "=";
+	symbolMap[token::tnext] = "X";
+	symbolMap[token::tfin] = "F";
+	symbolMap[token::tunt] = "U";
+	symbolMap[token::talw] = "G";
+
+	initParserOperators();
+
 }
 
 ostream& operator<<(ostream& os, const TruthTree& truthTree) {
