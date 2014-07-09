@@ -170,7 +170,7 @@ token StringFormula::parseSymbol(string symbol) {
 
 	bool isAllNum = true;
 	for (int i = 0; i < symbol.size(); i++)
-		if (!islower(symbol[i]))
+		if (!isalnum(symbol[i]) || isupper((int)symbol[i]))
 			isAllNum = false;
 
 	if (isAllNum)

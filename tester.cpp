@@ -72,8 +72,8 @@ int main() {
 	int idx = 0;
 	do {
 		cout << idx << endl;
-		cout << truthTree;
-		cout << endl;
+			cout << truthTree;
+			cout << endl;
 		idx++;
 	} while (truthTree.decomposeStep());
 
@@ -88,13 +88,20 @@ int main() {
 	cout << truthTree;
 	cout << endl;
 
-	/*for (int i = 0; i < 6; i++) {
-	 cout << i << endl;
-	 cout << truthTree;
-	 cout << endl;
-	 truthTree.decomposeStep();
-	 }*/
+	/*int i = 0;
 
+	for (i; i < 26; i++) {
+		cout << i << endl;
+		cout << truthTree;
+		cout << endl;
+		truthTree.decomposeStep();
+	}
+
+	truthTree.eliminateNodes();
+	cout << i << endl;
+	cout << truthTree;
+	cout << endl;
+	 */
 	string stringForm = truthTree.toFormattedString();
 
 	cout << endl << "W postaci sformatowanego stringa" << endl << stringForm
