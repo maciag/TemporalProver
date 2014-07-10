@@ -153,11 +153,6 @@ Item
 		
 		canvas.width = contentWidth;
 		canvas.height = contentHeight;
-		
-		for(var i = 0; i < treeGen.tokens.length; i++)
-		{
-			console.log("Token " + (i+1) + ": " + treeGen.tokens[i]);
-		}
 	}
 	
 	function computeResultNode()
