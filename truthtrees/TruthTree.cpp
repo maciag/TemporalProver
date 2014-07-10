@@ -246,7 +246,7 @@ void TruthTree::eliminateNodes() {
 			vector<StringFormula> toSatisfy = it->toSatisfy();
 			for (int i = 0; i < toSatisfy.size(); i++) {
 				tree<FormulaNode>::iterator matchIt = findFormula(toSatisfy[i]);
-				if (matchIt == mainTree.end() || !existsPath(it, matchIt)) {
+				if (!mainTree.is_valid(matchIt) || !existsPath(it, matchIt)) {
 					it->setEliminated();
 					eliminated = true;
 					break;
@@ -265,7 +265,7 @@ void TruthTree::eliminateNodes() {
 tree<FormulaNode>::iterator TruthTree::findFormula(StringFormula formula) {
 	tree<FormulaNode>::iterator it(root);
 
-	while (it != mainTree.end()) {
+	while (mainTree.is_valid(it)) {
 		if (it->contains(formula) && !it->isEliminated())
 			return it;
 		it++;
@@ -277,7 +277,8 @@ tree<FormulaNode>::iterator TruthTree::findFormula(StringFormula formula) {
 bool TruthTree::existsPath(tree<FormulaNode>::iterator it1,
 		tree<FormulaNode>::iterator it2) {
 	tree<FormulaNode>::iterator currentIt(it1);
-	while (currentIt != mainTree.end()) {
+
+	while (mainTree.is_valid(currentIt)) {
 
 		if (it1 == it2)
 			return false;
@@ -285,13 +286,13 @@ bool TruthTree::existsPath(tree<FormulaNode>::iterator it1,
 		if (currentIt == it2)
 			return true;
 
-		if (currentIt->getFeedbackPath() != NULL) {
-			if (existsPath(currentIt->getFeedbackPath(), it2))
-				return true;
-		}
-
 		currentIt++;
 	}
+
+	if (currentIt->getFeedbackPath() != NULL) {
+		return existsPath(currentIt->getFeedbackPath(), it2);
+	}
+
 	return false;
 }
 
