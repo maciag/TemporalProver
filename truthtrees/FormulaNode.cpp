@@ -32,7 +32,7 @@ StringFormula::decomposeType FormulaNode::decomposeNext(
 		// Sprawdzanie spełnialności, decyzja o elminiacji w przypadku zawierania zmiennej p i jej negacji !p
 		for (int i = 0; i < formulas.size(); i++) {
 			if (formulas[i].isPreposition())
-				for (int j = i; j < formulas.size(); j++) {
+				for (int j = 0; j < formulas.size(); j++) {
 					if (formulas[j].isPrepositionNegation(formulas[i])) {
 						eliminated = true;
 						return StringFormula::decomposeType::none;
@@ -70,8 +70,21 @@ StringFormula::decomposeType FormulaNode::decomposeNext(
 				}
 			}
 		}
-
-		if (stackIdx >= 0) {
+		if (singleIdx >= 0) {
+			childNodes.clear();
+			childNodes.resize(1);
+			vector<StringFormula> subformulas;
+			formulas[singleIdx].decompose(subformulas);
+			for (int i = 0; i < formulas.size(); i++)
+				if (!isChecked[i]) {
+					if (i == singleIdx) {
+						childNodes[0].appendFormula(subformulas[0]);
+					} else
+						childNodes[0].appendFormula(formulas[i]);
+				}
+			isChecked[singleIdx] = true;
+			return StringFormula::decomposeType::single;
+		} else if (stackIdx >= 0) {
 			childNodes.clear();
 			childNodes.resize(1);
 			vector<StringFormula> subformulas;
@@ -86,20 +99,6 @@ StringFormula::decomposeType FormulaNode::decomposeNext(
 				}
 			isChecked[stackIdx] = true;
 			return StringFormula::decomposeType::stacking;
-		} else if (singleIdx >= 0) {
-			childNodes.clear();
-			childNodes.resize(1);
-			vector<StringFormula> subformulas;
-			formulas[singleIdx].decompose(subformulas);
-			for (int i = 0; i < formulas.size(); i++)
-				if (!isChecked[i]) {
-					if (i == singleIdx) {
-						childNodes[0].appendFormula(subformulas[0]);
-					} else
-						childNodes[0].appendFormula(formulas[i]);
-				}
-			isChecked[singleIdx] = true;
-			return StringFormula::decomposeType::single;
 		} else if (stackBranchIdx >= 0) {
 			childNodes.clear();
 			childNodes.resize(2);
@@ -178,9 +177,18 @@ bool FormulaNode::isEliminated() {
 }
 
 void FormulaNode::appendFormula(StringFormula formula) {
-	formulas.push_back(formula);
-	isChecked.push_back(false);
-	allChecked = false;
+	bool diff = true;
+
+	for (int i = 0; i < formulas.size(); i++) {
+		if (formulas[i] == formula)
+			diff = false;
+	}
+
+	if (diff) {
+		formulas.push_back(formula);
+		isChecked.push_back(false);
+		allChecked = false;
+	}
 }
 
 void FormulaNode::appendFormula(string rawFormula) {
@@ -200,7 +208,7 @@ void FormulaNode::setAllChecked(bool value) {
 string FormulaNode::toFormattedString() {
 	string formattedString;
 	if (formulas.size() > 0)
-			formattedString.append(formulas[0].getRaw());
+		formattedString.append(formulas[0].getRaw());
 	for (int i = 1; i < formulas.size(); i++) {
 		formattedString.append("; " + formulas[i].getRaw());
 	}
@@ -268,7 +276,8 @@ ostream& operator<<(ostream& os, const FormulaNode& formulaNode) {
 	for (int i = 1; i < formulaNode.formulas.size(); i++) {
 		os << "; " << formulaNode.formulas[i];
 	}
-	os << "    eliminated: " << formulaNode.eliminated << "    all checked: " << formulaNode.allChecked;
+	os << "    eliminated: " << formulaNode.eliminated << "    all checked: "
+			<< formulaNode.allChecked;
 	return os;
 }
 
@@ -277,11 +286,9 @@ bool FormulaNode::operator==(const FormulaNode &other) const {
 	if (formulas.size() != other.formulas.size())
 		return false;
 	bool hasEqual;
-	for (int i = 0; i < formulas.size(); i++)
-	{
+	for (int i = 0; i < formulas.size(); i++) {
 		hasEqual = false;
-		for (int j = 0; j < other.formulas.size(); j++)
-		{
+		for (int j = 0; j < other.formulas.size(); j++) {
 			if (formulas[i] == other.formulas[j]) {
 				hasEqual = true;
 				break;

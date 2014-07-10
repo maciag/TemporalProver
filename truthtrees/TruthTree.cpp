@@ -155,17 +155,17 @@ bool TruthTree::decomposeStep() {
 			tree<FormulaNode>::iterator node;
 			node = mainTree.parent(currentNode);
 
-			while (node != mainTree.begin()) {
+			while (mainTree.is_valid(node)) {
 				if ((*node) == childNodes[0]) {
 					currentNode->setAllChecked(true);
-					mainTree.append_child(currentNode, childNodes[0]);
-					currentNode++;
 					currentNode->setFeedbackPath(node);
-					currentNode->setAllChecked(true);
+					//mainTree.append_child(currentNode, childNodes[0]);
+					//currentNode++;
+
+					//currentNode->setAllChecked(true);
 					break;
 				}
 				node = mainTree.parent(node);
-				;
 			}
 
 			if (currentNode->getFeedbackPath() == NULL) {
