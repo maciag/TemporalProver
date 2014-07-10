@@ -42,36 +42,25 @@ int QmlBridge::getOperatorArgCount(QString formula)
 bool QmlBridge::setTruthTreeOperator(QString token, QString symbol)
 {
 	if (token == "and") {
-		// TODO Thread wrapper - ustawienie operatora, funkcja wykorzystująca argument symbol i kojarząca go
-		// z jego odpowiednikiem w postaci typu wyliczeniowego zdefiniowanego w pliku LexicalTable.hpp
-		return true;
+		return TruthTree::changeOperator(tand,symbol.toStdString());
 	} else if (token == "or") {
-
-		return true;
+		return TruthTree::changeOperator(tor,symbol.toStdString());
 	} else if (token == "xor") {
-
-		return true;
+		return TruthTree::changeOperator(txor,symbol.toStdString());
 	} else if (token == "impl") {
-
-		return true;
+		return TruthTree::changeOperator(timp,symbol.toStdString());
 	} else if (token == "eq") {
-
-		return true;
+		return TruthTree::changeOperator(teq,symbol.toStdString());
 	} else if (token == "not") {
-
-		return true;
+		return TruthTree::changeOperator(tneg,symbol.toStdString());
 	} else if (token == "tempU") {
-
-		return true;
+		return TruthTree::changeOperator(tunt,symbol.toStdString());
 	} else if (token == "tempX") {
-
-		return true;
+		return TruthTree::changeOperator(tnext,symbol.toStdString());
 	} else if (token == "tempG") {
-
-		return true;
+		return TruthTree::changeOperator(talw,symbol.toStdString());
 	} else if (token == "tempF") {
-
-		return true;
+		return TruthTree::changeOperator(tfin,symbol.toStdString());
 	}
 	// Nie rozpoznano operatora
 	return false;

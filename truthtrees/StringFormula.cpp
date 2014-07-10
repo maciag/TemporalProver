@@ -76,6 +76,10 @@ void StringFormula::evalDecompositionType() {
 			type = decomposeType::stacking;
 			break;
 
+		case token::txor:
+			type = decomposeType::stacking;
+			break;
+
 		case token::timp:
 			type = decomposeType::stacking;
 			break;
@@ -110,6 +114,10 @@ void StringFormula::evalDecompositionType() {
 		break;
 
 	case token::tor:
+		type = decomposeType::branching;
+		break;
+
+	case token::txor:
 		type = decomposeType::branching;
 		break;
 
@@ -170,7 +178,7 @@ token StringFormula::parseSymbol(string symbol) {
 
 	bool isAllNum = true;
 	for (int i = 0; i < symbol.size(); i++)
-		if (!isalnum(symbol[i]) || isupper((int)symbol[i]))
+		if (!isalnum(symbol[i]) || isupper((int) symbol[i]))
 			isAllNum = false;
 
 	if (isAllNum)
@@ -345,6 +353,19 @@ bool StringFormula::decompose(vector<StringFormula> &elements) {
 			break;
 		}
 
+		case token::txor: {
+			StringFormula negSecond = second, negFirst = first;
+			negFirst.negate();
+			negSecond.negate();
+			StringFormula newFormula1 = compose(first, token::tand, negSecond);
+			StringFormula newFormula2 = compose(negFirst, token::tand, second);
+			newFormula1.negate();
+			newFormula2.negate();
+			elements.push_back(newFormula1);
+			elements.push_back(newFormula2);
+			break;
+		}
+
 		}
 		break;
 
@@ -385,6 +406,17 @@ bool StringFormula::decompose(vector<StringFormula> &elements) {
 		elements.push_back(second);
 		elements.push_back(first);
 		elements.push_back(newFormula);
+		break;
+	}
+
+	case token::txor: {
+		StringFormula negSecond = second, negFirst = first;
+		negFirst.negate();
+		negSecond.negate();
+		StringFormula newFormula1 = compose(first, token::tand, negSecond);
+		StringFormula newFormula2 = compose(negFirst, token::tand, second);
+		elements.push_back(newFormula1);
+		elements.push_back(newFormula2);
 		break;
 	}
 
