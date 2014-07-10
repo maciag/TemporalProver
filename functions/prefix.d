@@ -110,9 +110,9 @@ void buildInfixExpression(ref char[] stack, char[] operator)
 		char[][] arg0 = args[0].split("\n");  // Wypakowujemy operator
 		
 		if(operator.hasNotLowerPrecedence(arg0[1]))
-			res = operator ~ "(" ~ arg0[0].strip() ~ ")";
+			res = operator ~ (operator.length > 1 ? " " : "") ~ "(" ~ arg0[0].strip() ~ ")";
 		else
-			res = operator ~ arg0[0].strip();
+			res = operator ~ (operator.length > 1 ? " " : "") ~ arg0[0].strip();
 	}
 	
 	else if(argc == 2)
