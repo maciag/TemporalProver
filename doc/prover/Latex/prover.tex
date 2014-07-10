@@ -6,6 +6,7 @@
 \usepackage{tabularx}
 \usepackage{tikz}
 \usepackage{tikz-qtree}
+\usepackage{float}
 
 \renewcommand{\labelenumii}{\arabic{enumi}.\arabic{enumii}}
 \renewcommand{\labelenumiii}{\arabic{enumi}.\arabic{enumii}.\arabic{enumiii}}
@@ -13,7 +14,7 @@
 
 \tikzset{every tree node/.style={align=center,anchor=north}}
 
-\title{Prover - automatyzacja procesu wnioskowania logicznego z wykorzystaniem drzew prawdy}
+\title{Prover logiki temporalnej}
 \author{Stanisław Maciąg, Piotr Mitana}
 \date{2014}
 
@@ -27,21 +28,84 @@
 \maketitle
 
 \section{Założenia projektowe}
-W ramach projektu zaprojektowana oraz zaimplementowana zostanie aplikacja, realizująca proces wnioskowania na podstawie dostarczonych przez użytkownika formuł logicznych stanowiących przesłanki oraz konkluzje. Poprawność wnioskowania sprawdzana będzie z wykorzystaniem algorytmu operującego na drzewach prawdy (ang. \textit{Truth Trees}).
+W ramach projektu zaprojektowana oraz zaimplementowana zostanie aplikacja sprawdzająca spełnialność formuły logicznej zawierającej operatory klasyczne oraz temporalne, danej w postaci ciągu znaków wprowadzonego przez użytkownika lub wczytanego z pliku. Do realizacji tego zadania wykorzystana zostanie metoda tablic semantycznych dla logiki temporalnej (ang. \textit{the Tableau Method for Temporal Logic}).
 
 \subsection{Środowisko}
 \begin{enumerate}
 	\item System operacyjny Linux
 	\item Języki programowania C++ oraz D
+	\item Framework Qt w wersji 5
 \end{enumerate}
 
 \subsection{Implementowane funkcjonalności}
 \begin{enumerate}
 	\item Graficzny interfejs użytkownika (\textit{GUI}), umożliwiający wygodną obsługę aplikacji
 	\item Dane wejściowe (formuły logiczne) wprowadzane ręcznie w postaci ciągu znaków, lub z pliku tekstowego (składnia wyrażeń opisana w \ref{skladnia})
-	\item Zapis danych wejściowych, otrzymanego drzewa prawdy oraz wyniku do pliku
-	\item Wizualizacja drzewa prawdy
+	\item Wizualizacja formuły wejściowej w postaci drzewa
+	\item Wizualizacja przeprowadzonego procesu dekompozycji formuły w postaci drzewa
+	\item Interpretacja wynikowego drzewa dostarczająca informacji o spełnialności formuły
+	\item Możliwość edycji stosowanych operatorów
 \end{enumerate}
+
+\section{Obsługa aplikacji}
+
+\begin{figure}[H]
+\centering
+\includegraphics[height=12cm]{main_view}
+\caption{Widok głównego okna programu}
+\end{figure}
+
+\begin{enumerate}
+	\item Obszar rysowania drzewa
+	\item Bieżąca formuła logiczna
+	\item Przycisk otwierający okno wprowadzania formuły
+	\item Przycisk definicji operatorów
+	\item Informacja o wyniku działania algorytmu
+	\item Przycisk inicjalizacji dekompozycji
+	\item Widok na drzewo dekompozycji
+	\item Widok na drzewo formuły
+\end{enumerate}
+
+\subsection{Przykład dekompozycji}
+
+\subsubsection{Wprowadzenie formuły}
+\begin{figure}[H]
+\centering
+\includegraphics[height=6cm]{operators_view}
+\caption{Okno definicji operatorów}
+\end{figure}
+
+Program posiada możliwość edycji stosowanych operatorów logicznych i temporalnych. Powyżej przedstawiono zestaw domyślnych operatorów.
+
+\subsubsection{Wprowadzenie formuły}
+\begin{figure}[H]
+\centering
+\includegraphics[height=6cm]{input_view}
+\caption{Okno wprowadzania formuły}
+\end{figure}
+
+Wprowadzana formuła powinna zawierać symbole operatorów zgodne ze zdefiniowanymi. Po zakończeniu edycji należy zaakceptować (1) lub odrzucić (2) zmiany. Istnieje także możliwość wczytania formuły z pliku (3). Po zdefiniowaniu formuły wejściowej użytkownikowi zostanie zaprezentowana jej wizualizacja w postaci drzewa:
+
+\begin{figure}[H]
+\centering
+\includegraphics[height=6cm]{treeformula_view}
+\caption{Wizualizacja formuły logicznej}
+\end{figure}
+
+\subsubsection{Dekompozycja}
+\begin{figure}[H]
+\centering
+\includegraphics[height=6cm]{output_view}
+\caption{Przedstawienie wyników}
+\end{figure}
+
+Po zakończeniu działania algorytmu program wyświetli uzyskane drzewo dekompozycji oraz informację o spełnialności formuły wejściowej. Kliknięcie na węzeł powoduje wyświetlenie jego zawartości:
+
+\begin{figure}[H]
+\centering
+\includegraphics[height=6cm]{node_view}
+\caption{Zawartość przykładowego węzła w drzewie dekompozycji}
+\end{figure}
 
 \section{Analiza leksykalna}
 
@@ -65,6 +129,14 @@ W ramach projektu zaprojektowana oraz zaimplementowana zostanie aplikacja, reali
   \hline
   [formuła] = [formuła] & Dwuargumentowy operator ekwiwalencji logicznej\\
   \hline
+  X[formuła] & Jednoargumentowy operator temporalny \textit{Next}\\
+  \hline
+  F[formuła] & Jednoargumentowy operator temporalny \textit{Finally}\\
+  \hline
+  G[formuła] & Jednoargumentowy operator temporalny \textit{Globally}\\
+  \hline
+  [formuła] U [formuła] & Dwuargumentowy operator temporalny \textit{Until}\\
+  \hline
   ([formuła]) & Nawiasy okrągłe - grupowanie wyrażeń\\
   \hline
 \end{tabular}
@@ -74,7 +146,9 @@ W ramach projektu zaprojektowana oraz zaimplementowana zostanie aplikacja, reali
   \hline
   \textbf{Operator} & \textbf{Priorytet}\\
   \hline
-  Negacja & Najwyższy\\
+  Negacja, jednoargumentowe operatory temporalne & Najwyższy\\
+  \hline
+  Dwuargumentowy operator temporalny \textit{Until} & Wysoki\\ 
   \hline
   Koniunkcja, alternatywa, alternatywa wykluczająca & Średni\\
   \hline
@@ -82,100 +156,15 @@ W ramach projektu zaprojektowana oraz zaimplementowana zostanie aplikacja, reali
   \hline
 \end{tabular}
 
-\subsection{Reguły wydzielania tokenów}
-\begin{enumerate}
-	\item Białe znaki rozdzielające tokeny są ignorowane, jednak ich wystąpienie powoduje natychmiastowe odcięcie tokena od reszty formuły (w wypadku poprawnej składniowo formuły nie wpłynie to na sposób jej podziału)
-	\item Nawiasy oraz operator negacji są samodzielnymi tokenami, więc są natychmiastowo odcinane i zwracane
-	\item Ciąg znaków niealfanumerycznych (z wyłączeniem białych znaków, nawiasów i wykrzyknika) zostanie zwrócony jako jeden token (operator)
-	\item Ciąg znaków alfanumerycznych zostanie zwrócony jako jeden token (zmienna)
-\end{enumerate}
-
-\subsection{Reguły walidacji}
-Definiowane są w następujący sposób – dla każdego elementu składniowego określane jest, czy może stać na początku oraz jakie elementy dozwolone są za nim.
-
-\begin{tabular}{|C{3cm}|C{3cm}|C{5cm}|}
-\hline
-\textbf{Element języka} & \textbf{Może zaczynać formułę} & Dozwolone następne tokeny\\
-\hline
-Zmienna logiczna & Tak & \&, |, \^{}, >, =, ), koniec formuły\\
-\hline
-! & Tak & Zmienna logiczna, !, (\\
-\hline
-\&, |, \^{}, >, = & Nie & Zmienna logiczna, !, (\\
-\hline
-( & Tak & Zmienna logiczna, !, (\\
-\hline
-) & Nie & \&, |, \^{}, >, =, ), koniec formuły\\
-\hline
-\end{tabular}
-
-Dodatkowo, ilości nawiasów otwierających i zamykających muszą być równe.
-\newpage
-
 \section{Algorytm działania}
 
 \begin{figure}[!htb]
 \centering
-\includegraphics[height=7cm]{main_alg}
+\includegraphics[height=9cm]{main_alg}
 \caption{Przebieg głównego algorytmu}
 \end{figure}
 
-\subsection{Konwersja do notacji prefiksowej}
-Przed procesem dekompozycji formuła zostaje przetworzona do postaci prefiksowej (będącej de facto prostą reprezentacją drzewa), w której tokeny oddzielone są pojedynczą spacją. Proces ten należy poprzedzić walidacją formuły, ponieważ funkcja budująca drzewo już zakłada jej poprawność.
-
-\subsubsection{Walidacja}
-Proces walidacji polega na sprawdzeniu sąsiedztwa każdego z tokenów zgodnie z regułami podanymi wcześniej. Faktycznie są one jednak sprawdzane pośrednio – funkcja walidująca sprawdza poprzedzający operator, a nie następny (słowo a może stać przed słowem b wtedy i tylko wtedy, gdy słowo b może stać za słowem a). Dodatkowe reguły:
-\begin{itemize}
-	\item Na początku procesu zmienna przechowująca poprzedni token jest pusta – sprawdzenie, czy dany token może zaczynać formułę sprowadzone jest do sprawdzenia, czy może być poprzedzone przez pusty token
-	\item Koniec formuły wykryty jest, gdy zostanie wczytany pusty token. Następuje więc sprawdzenie, czy pusty token może być poprzedzane przez poprzedni (będący ostatnim w formule)
-	\item Na końcu procesu walidacji sprawdzany jest balans nawiasów
-\end{itemize}
-
-\subsubsection{Algorytm konwersji}
-Proces ten dokonywany jest przy użyciu dwóch stosów – operatorów oraz operandów. Stosy są reprezentowane przez ciągi znaków, których elementy oddzielone są tabulacjami. Poniżej wypisane są kroki algorytmu.
-\begin{enumerate}
-	\item Pobieraj kolejne słowa formuły, dla każdego wykonaj:
-	\begin{enumerate}
-		\item Jeżeli „(”, odłóż na stos operatorów
-		\item Jeżeli „)”, to:
-		\begin{enumerate}
-			\item Zdejmuj ze stosu operatorów tak długo, aż napotkasz „(”
-			\item Dla każdego operatora zdejmij właściwą ilość argumentów ze stosu operandów Odłóż na stos operandów wartość zawierającą operator oraz jego argumenty oddzielone spacjami
-		\end{enumerate}
-		\item Jeżeli inny operator (przyjmijmy \textit{a}), to:
-		\begin{enumerate}
-			\item Zdejmuj ze stosu operatorów (przyjmijmy \textit{b}), dopóki operator \textit{b} ma taki sam lub większy priorytet od \textit{a}. Dla każdego wykonaj:
-			\begin{enumerate}
-				\item Zdejmij właściwą dla operatora ilość argumentów ze stosu operandów
-				\item Odłóż na stos operandów wartość zawierającą operator oraz jego argumenty oddzielone spacjami
-			\end{enumerate}
-			\item Odłóż \textit{b} na stos operatorów (\textit{b} będzie pierwszym o priorytecie mniejszym od \textit{a})
-			\item Odłóż \textit{a} na stos operatorów
-		\end{enumerate}
-		\item W innym wypadku (czyli nazwa zmiennej) odłóż na stos operandów
-	\end{enumerate}
-	\item Pobierz i zwróć wynik ze stosu operandów
-\end{enumerate}
-
 \subsection{Dekompozycja formuły}
-
-\subsubsection{Drzewa prawdy}
-Drzewa prawdy stanowią jedno z narzędzi służących do rozwiązywania problemów logicznych. Ich główną zaletą jest duża efektywność, przekładająca się na mniejszą złożoność czasową. Metody wykorzystujące drzewa prawdy nie wymagają rozwiązywania trudnych problemów decyzyjnych, dzięki czemu są dobrze algorytmizowalne. Poniżej przedstawiono listę problemów, które można rozwiązać korzystając z drzew prawdy:
-
-\begin{itemize}
-	\item Dowodzenie sprzeczności lub niesprzeczności zbioru twierdzeń
-	\item Sprawdzanie poprawności dowodu (wnioskowania)
-	\item Wykrywanie tautologii i kontrtautologii
-	\item Sprawdzenie semantycznej równoważności
-\end{itemize}
-
-Bez względu na charakter analizowanego problemu, rozwiązanie zawsze uzyskuje się w trzech następujących krokach:
-
-\begin{enumerate}
-	\item Zdefiniowanie korzenia drzewa, zgodnie z typem rozpatrywanego problemu
-	\item Budowanie drzewa poprzez zastosowanie reguł dekompozycji do złożonych wyrażeń logicznych (przedstawione w \ref{dekompozycja}
-	\item Interpretacja wyników
-\end{enumerate}
 
 \subsubsection{Reguły dekompozycji}
 \label{dekompozycja}
@@ -204,35 +193,40 @@ Bez względu na charakter analizowanego problemu, rozwiązanie zawsze uzyskuje s
 \hline
 \end{tabular}
 
-\subsubsection{Algorytm sprawdzania poprawności dowodu}
+\begin{tabular}{|C{5cm}|C{5cm}|}
+\hline
+\Tree [.{$\neg X p$} [.{$X \neg P$} ] ] &  Negacja operatora \textit{Next}\\
+\hline
+\Tree[.{$F p$} {$p$} {$X F p$} ] &  Operator \textit{Finally}\\
+\hline
+\Tree[.{$\neg F p$} [.{$\neg p$ \\ $\neg X F p$} ] ] & Negacja operatora \textit{Finally}\\
+\hline
+\Tree[.{$p U q$} {$q$} [.{$p$ \\ $X ( p U q)$} ] ] &  Operator \textit{Until}\\
+\hline
+\Tree [.{$\neg (p U q) $} [.{$\neg q$ \\ $\neg p \vee \neg X (p U q)$} ] ] &  Negacja operatora \textit{Until}\\
+\hline
+\Tree[.{$G p$} {$p$} {$X G p$} ] &  Operator \textit{Globally}\\
+\hline
+\end{tabular}
+
+\subsubsection{Algorytm metody tablic semantycznych}
 \begin{enumerate}
-	\item Tworzenie korzenia drzewa poprzez zapis przesłanek oraz \textit{zaprzeczenia} konkluzji w postaci ciągu wyrażeń (kolumny) o numerowanych (rozróżnialnych) wierszach
+	\item Tworzenie korzenia drzewa zawierającego formułę wejściową (lub jej zaprzeczenie)
 	\item Dekompozycja następnego w kolejności wyrażenia logicznego. Kolejność dekomponowania wyrażeń znajdujących się w węzłach drzewa jest dowolna, jednak ze względu efektywność algorytmu najlepiej przyjąć następujący porządek:
 	\begin{itemize}
-	\item[1] Dekomponowanie wyrażeń niepowodujących rozgałęziania - koniunkcja, zaprzeczenie alternatywy oraz zaprzeczenie implikacji
-	\item[2] Dekomponowanie wyrażeń powodujących rozgałęzianie oraz tworzących dwa pod-wyrażenia w węzłach potomnych - ekwiwalencja oraz zaprzeczenie ekwiwalencji
-	\item[3] Dekomponowanie wyrażeń powodujących rozgałęzianie oraz tworzących jedno wyrażenie w węzłach potomnych - zaprzeczenie koniunkcji, alternatywa, implikacja
+	\item[1] Dekomponowanie wyrażeń niepowodujących rozgałęziania
+	\item[2] Dekomponowanie wyrażeń powodujących rozgałęzianie oraz tworzących dwa pod-wyrażenia w węzłach potomnych
+	\item[3] Dekomponowanie wyrażeń powodujących rozgałęzianie oraz tworzących jedno wyrażenie w węzłach potomnych
 	\end{itemize}
-	\item Dekompozycję powtarza się, dopóki w liściach drzewa nie pozostaną same pojedyncze zmienne logiczne bądź ich zaprzeczenia
-	\item Zamykanie gałęzi - gałąź drzewa określa się jako zamkniętą, jeśli na ścieżce od korzenia drzewa do liścia występuje pojedyncza zmienna logiczna oraz jej zaprzeczenie
-	\item Interpretacja wyników - jeżeli drzewo posiada przynajmniej jedną otwartą gałąź to wnioskowanie jest niepoprawne
+	\item W przypadku węzła, który zawiera wyrażenia z operatorem \textit{Next} - rozszerzenie drzewa, przez przyłączenie potomka zawierającego wyrażenia nieatomiczne, z usuniętym zewnętrznym operatorem \textit{Next}, lub w przypadku gdy takie wyrażenie już występowało w nadrzędnym węźle, utworzenie ścieżki do tego węzła
+	\item Dekompozycję powtarza się, w każdym węźle nie zostaną sprawdzone wszystkie wyrażenia
+	\item Eliminacja węzłów - węzeł oznacza się jako usunięty, jeśli:
+	\begin{itemize}
+	\item[1] Zawiera on dwie osobne formuły, które są zmienną logiczną i jej zaprzeczeniem
+	\item[2] Wszyscy potomkowie węzła zostali usunięci
+	\item[3] Jeśli węzeł zawiera operatory temporalne $F p$ lub $q U p$ i jeśli nie istnieje w drzewie ścieżka prowadząca do węzła zawierającego formułę $p$ 
+	\end{itemize}
+	\item Interpretacja wyników - jeżeli korzeń drzewa został usunięty, to formuła jest niespełnialna (w przypadku, gdy w korzeniu zostało podane jej zaprzeczenie jest spełnialna)
 \end{enumerate}
 
-\subsubsection{Programowa realizacja dekompozycji wyrażeń}
-W zastosowanym przez nas algorytmie postać prefiksowa zostanie przekształcona do postaci właściwego drzewa, którego węzły będą przechowywały tablice napisów zawierające kolejne zdania logiczne w postaci prefiksowej. Poniżej zaprezentowano fragment algorytmu wykonujący jeden krok dekompozycji pojedynczej formuły:
-\begin{enumerate}
-	\item Jeżeli słowo jest zmienną, wróć
-	\item Jeżeli jest operatorem negacji, pobierz następne słowo (będzie operatorem) i połącz z poprzednim
-	\item Każdy z argumentów operatora pobierz w następujący sposób:
-	\begin{enumerate}
-		\item Ustal ilość wymaganych symboli na 1
-		\item Pobieraj kolejny symbol, dopóki ilość wymaganych symboli jest większa od 0. Dla każdego wykonuj:
-		\begin{enumerate}
-			\item Jeżeli symbol jest zmienną, zmniejsz ilość wymaganych symboli o 1
-			\item Jeżeli symbol jest operatorem, zwiększ ilość wymaganych symboli o ilość argumentów tego operatora - 1
-		\end{enumerate}
-		\item Argumentem są wszystkie pobrane symbole w kolejności ich występowania
-	\end{enumerate}
-	\item Zgodnie z regułami dekompozycji utwórz jeden lub dwa węzły potomne i przypisz im odpowiednie wartości
-\end{enumerate}
 \end{document}
