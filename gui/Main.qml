@@ -33,6 +33,24 @@ ApplicationWindow
 				ioTargetComponent.text = cppBridge.loadFile(fileUrl);
 			}
 			
+			else if(ioMode == "operators")
+			{
+				var lines = cppBridge.loadFile(fileUrl).split("\n");
+				
+				operatorEditOverlay.and = lines[0];
+				operatorEditOverlay.or = lines[1];
+				operatorEditOverlay.xor = lines[2];
+				operatorEditOverlay.impl = lines[3];
+				operatorEditOverlay.eq = lines[4];
+				operatorEditOverlay.not = lines[5];
+				operatorEditOverlay.tempU = lines[6];
+				operatorEditOverlay.tempX = lines[7];
+				operatorEditOverlay.tempF = lines[8];
+				operatorEditOverlay.tempG = lines[9];
+				
+				operatorEditOverlay.updateTextFields();
+			}
+			
 /*			else if(ioMode == "data")
 			{
 				var lines = cppBridge.loadFile(fileUrl).split("\n");
@@ -42,7 +60,7 @@ ApplicationWindow
 				predList.model.clear();
 				
 				for(var i = 0; i < lines.length; i++)
-				{
+					eq{
 					if(lines[i] == "")
 						continue;
 					
@@ -281,6 +299,12 @@ ApplicationWindow
 				}
 			}
 			
+			CheckBox
+			{
+				id: negate;
+				text: "Neguj";
+			}
+			
 			Button
 			{
 				implicitWidth: 200;
@@ -317,9 +341,11 @@ ApplicationWindow
 					{
 						preds.push(predList.model.get(i).value);
 					}
+*/					
+					var formula = conclusionLabel.text;
 					
-*/					progressOverlay.visible = true;
-					cppBridge.startComputation(conclusionLabel.text);
+					progressOverlay.visible = true;
+					cppBridge.startComputation(negate.checked ? operatorEditOverlay.not + "(" + formula + ")" : formula);
 				}
 			}
 			

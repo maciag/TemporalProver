@@ -29,7 +29,8 @@ Overlay
 		tooltip: "Wczytaj z pliku";
 		onClicked:
 		{
-			// TODO Wczytanie operatorów z pliku
+			main.ioMode = "operators";
+			loadDialog.visible = true;
 		}
 	},
 	
