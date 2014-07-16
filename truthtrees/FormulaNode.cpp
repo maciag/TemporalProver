@@ -192,9 +192,7 @@ void FormulaNode::appendFormula(StringFormula formula) {
 }
 
 void FormulaNode::appendFormula(string rawFormula) {
-	formulas.push_back(StringFormula(rawFormula));
-	isChecked.push_back(false);
-	allChecked = false;
+	appendFormula(StringFormula(rawFormula));
 }
 
 bool FormulaNode::getAllChecked() {

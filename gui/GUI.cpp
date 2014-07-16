@@ -151,7 +151,7 @@ void QmlBridge::saveFile(QUrl file, QString content)
 
 void QmlBridge::startComputation(QString formula)
 {
-	workerThread = new WorkerThread(formula.toUtf8().data());
+	workerThread = new WorkerThread(formula.toStdString());
 	
 	connect(workerThread, SIGNAL(allDone(QString, bool)), this, SLOT(threadFinished(QString, bool)));
 	workerThread->startComputation();

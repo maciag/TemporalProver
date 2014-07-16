@@ -28,6 +28,7 @@ public:
 	void decomposeAll();
 	bool decomposeStep();
 	void eliminateNodes();
+	void eliminateNode(tree<FormulaNode>::pre_order_iterator node);
 	bool getResult();
 
 	static bool changeOperator(token op, string symbol);

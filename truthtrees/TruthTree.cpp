@@ -75,7 +75,7 @@ void TruthTree::initParserOperators() {
 			break;
 
 		case token::tneg:
-			precendence = 6;
+			precendence = 5;
 			unary = true;
 			break;
 
@@ -125,28 +125,36 @@ bool TruthTree::decomposeStep() {
 		case StringFormula::decomposeType::branching:
 			mainTree.append_child(currentNode, childNodes[0]);
 			mainTree.append_child(currentNode, childNodes[1]);
+			eliminateNode(mainTree.child(currentNode, 0));
+			eliminateNode(mainTree.child(currentNode, 1));
 			currentNode->setAllChecked(true);
 			//return true;
 			break;
 		case StringFormula::decomposeType::branching_stacking:
 			mainTree.append_child(currentNode, childNodes[0]);
 			mainTree.append_child(currentNode, childNodes[1]);
+			eliminateNode(mainTree.child(currentNode, 0));
+			eliminateNode(mainTree.child(currentNode, 1));
 			currentNode->setAllChecked(true);
 			//return true;
 			break;
 		case StringFormula::decomposeType::branching_substacking:
 			mainTree.append_child(currentNode, childNodes[0]);
 			mainTree.append_child(currentNode, childNodes[1]);
+			eliminateNode(mainTree.child(currentNode, 0));
+			eliminateNode(mainTree.child(currentNode, 1));
 			currentNode->setAllChecked(true);
 			//return true;
 			break;
 		case StringFormula::stacking:
 			mainTree.append_child(currentNode, childNodes[0]);
+			eliminateNode(mainTree.child(currentNode, 0));
 			currentNode->setAllChecked(true);
 			//return true;
 			break;
 		case StringFormula::decomposeType::single:
 			mainTree.append_child(currentNode, childNodes[0]);
+			eliminateNode(mainTree.child(currentNode, 0));
 			currentNode->setAllChecked(true);
 			//return true;
 			break;
@@ -170,6 +178,7 @@ bool TruthTree::decomposeStep() {
 
 			if (currentNode->getFeedbackPath() == NULL) {
 				mainTree.append_child(currentNode, childNodes[0]);
+				eliminateNode(mainTree.child(currentNode, 0));
 				currentNode->setAllChecked(true);
 			}
 
@@ -260,6 +269,38 @@ void TruthTree::eliminateNodes() {
 
 	if (eliminated)
 		eliminateNodes();
+}
+
+void TruthTree::eliminateNode(tree<FormulaNode>::pre_order_iterator node) {
+	if (!node->isEliminated() && node.number_of_children() != 0) {
+
+		//tree<FormulaNode>::sibling_iterator sibIt = mainTree.child(it, 0);
+		bool allEliminated = true;
+
+		for (int i = 0; i < mainTree.number_of_children(node); i++) {
+			if (!(mainTree.child(node, i)->isEliminated())) {
+				allEliminated = false;
+				break;
+			}
+		}
+
+		if (allEliminated) {
+			node->setEliminated();
+		}
+	}
+
+	if (!node->isEliminated()) {
+
+		vector<StringFormula> toSatisfy = node->toSatisfy();
+		for (int i = 0; i < toSatisfy.size(); i++) {
+			tree<FormulaNode>::iterator matchIt = findFormula(toSatisfy[i]);
+			if (!mainTree.is_valid(matchIt) || !existsPath(node, matchIt)) {
+				node->setEliminated();
+				break;
+			}
+		}
+
+	}
 }
 
 tree<FormulaNode>::iterator TruthTree::findFormula(StringFormula formula) {
@@ -387,7 +428,7 @@ bool TruthTree::changeOperator(token op, string symbol) {
 		break;
 
 	case token::tneg:
-		precendence = 6;
+		precendence = 5;
 		unary = true;
 		break;
 

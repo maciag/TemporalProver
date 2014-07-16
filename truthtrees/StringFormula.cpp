@@ -557,7 +557,7 @@ StringFormula StringFormula::needSatisfaction() {
 		//std::cout << StringFormula(newSymbolArray) << endl;
 		return StringFormula(newSymbolArray);
 	}
-	if (tokenArray[1] == token::tunt) {
+	if (tokenArray[0] == token::tunt) {
 		int idx = 0, counter = 1;
 
 		while (counter != 0) {
