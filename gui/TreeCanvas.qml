@@ -5,6 +5,7 @@ Canvas
 {
 	property var nodes: [];  // Węzły
 	property var linePoints: [];  // Pozycje x i y węzłów - łączenia 1 i 2, 3 i 4 itd.
+	property string type;
 	
 	signal nodeClicked(string token, string value);
 	
@@ -34,7 +35,17 @@ Canvas
 				{
 					if(nodes[i].x == x && nodes[i].y == y)
 					{
-						nodeClicked(nodes[i].token, nodes[i].value);
+						var value = "";
+						if(type == "expression")
+						{
+							value = cppBridge.toInfix(nodes[i].value);
+						}
+						else if(type == "result")
+						{
+							value = formulaGroupToInfix(nodes[i].value);
+						}
+						
+						nodeClicked(nodes[i].token, value);
 					}
 				}
 			}
@@ -80,5 +91,23 @@ Canvas
 		{
 			context.fillText(nodes[i].token, margin+20*nodes[i].x+10, margin+40*nodes[i].y+12);
 		}
+	}
+	
+	function formulaGroupToInfix(formulaGroup)
+	{
+		var formulas = formulaGroup.split(";");
+		var res = "";
+		
+		for(var i = 0; i < formulas.length; i++)
+		{
+			res += (i%2 ? "<font color='#008000'>" : "<font color='#000080'>");
+			res += cppBridge.toInfix(formulas[i]);
+			res += "</font>";
+			
+			if(i != formulas.length-1)
+				res += "<br/>";
+		}
+		
+		return res;
 	}
 }

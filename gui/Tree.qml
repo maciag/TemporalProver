@@ -11,6 +11,8 @@ Item
 	property int contentWidth: 0;
 	property int contentHeight: 0;
 	
+	property string type: "";
+	
 	Component.onCompleted: setPrefix();
 	
 	QtObject
@@ -48,6 +50,8 @@ Item
 		
 		canvas.width = contentWidth;
 		canvas.height = contentHeight;
+		
+		canvas.type = "expression";
 	}
 	
 	function computeToken()
@@ -69,15 +73,13 @@ Item
 			i++;
 		}
 		
-		var infix = cppBridge.toInfix(prefix);
-		
 		// Dodanie węzła i podwęzłów
 		if(argCount == 0)
 		{
 			treeGen.index++;
 			
 			nodeX = treeGen.x;
-			canvas.nodes.push({x: nodeX, y: treeGen.y, token: nodeToken, value: infix});
+			canvas.nodes.push({x: nodeX, y: treeGen.y, token: nodeToken, value: prefix});
 		}
 		
 		else if(argCount == 1)
@@ -87,7 +89,7 @@ Item
 			treeGen.y++;
 			nodeX = computeToken();
 			treeGen.y--;
-			canvas.nodes.push({x: nodeX, y: treeGen.y, token: nodeToken, value: infix});
+			canvas.nodes.push({x: nodeX, y: treeGen.y, token: nodeToken, value: prefix});
 			
 			// Linia
 			canvas.linePoints.push(Qt.point(nodeX, treeGen.y));
@@ -104,7 +106,7 @@ Item
 			treeGen.x++;
 			
 			nodeX = treeGen.x;
-			canvas.nodes.push({x: nodeX, y: treeGen.y, token: nodeToken, value: infix});
+			canvas.nodes.push({x: nodeX, y: treeGen.y, token: nodeToken, value: prefix});
 			treeGen.x++;
 			
 			treeGen.y++;
@@ -153,6 +155,8 @@ Item
 		
 		canvas.width = contentWidth;
 		canvas.height = contentHeight;
+		
+		canvas.type = "result";
 	}
 	
 	function computeResultNode()
@@ -188,7 +192,7 @@ Item
 			treeGen.index += 3;  // Pomijamy ten węzeł i jego puste dzieci
 			
 			nodeX = treeGen.x;
-			canvas.nodes.push({x: nodeX, y: treeGen.y, token: "", value: formulaGroupToInfix(nodeValue)});
+			canvas.nodes.push({x: nodeX, y: treeGen.y, token: "", value: nodeValue});
 		}
 		else if(argCount == 1)
 		{
@@ -197,7 +201,7 @@ Item
 			treeGen.y++;
 			nodeX = computeResultNode();
 			treeGen.y--;
-			canvas.nodes.push({x: nodeX, y: treeGen.y, token: "", value: formulaGroupToInfix(nodeValue)});
+			canvas.nodes.push({x: nodeX, y: treeGen.y, token: "", value: nodeValue});
 			
 			// Linia
 			canvas.linePoints.push(Qt.point(nodeX, treeGen.y));
@@ -217,7 +221,7 @@ Item
 			treeGen.x++;
 			
 			nodeX = treeGen.x;
-			canvas.nodes.push({x: nodeX, y: treeGen.y, token: "", value: formulaGroupToInfix(nodeValue)});
+			canvas.nodes.push({x: nodeX, y: treeGen.y, token: "", value: nodeValue});
 			treeGen.x++;
 			
 			treeGen.y++;
@@ -239,23 +243,5 @@ Item
 		contentHeight = contentHeight < requiredHeight ? requiredHeight : contentHeight;
 		
 		return nodeX;
-	}
-	
-	function formulaGroupToInfix(formulaGroup)
-	{
-		var formulas = formulaGroup.split(";");
-		var res = "";
-		
-		for(var i = 0; i < formulas.length; i++)
-		{
-			res += (i%2 ? "<font color='#008000'>" : "<font color='#000080'>");
-			res += cppBridge.toInfix(formulas[i]);
-			res += "</font>";
-			
-			if(i != formulas.length-1)
-				res += "<br/>";
-		}
-		
-		return res;
 	}
 }
