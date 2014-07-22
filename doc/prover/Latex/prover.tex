@@ -7,7 +7,8 @@
 \usepackage{tikz}
 \usepackage{tikz-qtree}
 \usepackage{float}
-
+\usepackage{hyperref}
+\usepackage{longtable}
 \renewcommand{\labelenumii}{\arabic{enumi}.\arabic{enumii}}
 \renewcommand{\labelenumiii}{\arabic{enumi}.\arabic{enumii}.\arabic{enumiii}}
 \renewcommand{\labelenumiv}{\arabic{enumi}.\arabic{enumii}.\arabic{enumiii}.\arabic{enumiv}}
@@ -33,8 +34,9 @@ W ramach projektu zaprojektowana oraz zaimplementowana zostanie aplikacja sprawd
 \subsection{Środowisko}
 \begin{enumerate}
 	\item System operacyjny Linux
-	\item Języki programowania C++ oraz D
+	\item Języki programowania C++ w standardzie C++11 oraz D (kompilator DMD, \url{http://dlang.org/download.html})
 	\item Framework Qt w wersji 5
+	\item Biblioteka \textit{tree.hh} (\url{http://tree.phi-sci.com/})
 \end{enumerate}
 
 \subsection{Implementowane funkcjonalności}
@@ -95,7 +97,7 @@ Wprowadzana formuła powinna zawierać symbole operatorów zgodne ze zdefiniowan
 \subsubsection{Dekompozycja}
 \begin{figure}[H]
 \centering
-\includegraphics[height=6cm]{output_view}
+\includegraphics[height=8cm]{output_view}
 \caption{Przedstawienie wyników}
 \end{figure}
 
@@ -113,9 +115,9 @@ Po zakończeniu działania algorytmu program wyświetli uzyskane drzewo dekompoz
 \label{skladnia}
 \begin{tabular}{|C{5cm}|C{5cm}|}
   \hline
-  \textbf{Ciąg znaków} & \textbf{Znaczenie}\\ 
+  \textbf{Ciąg znaków (domyślne operatory programu)} & \textbf{Znaczenie}\\ 
   \hline 
-  Ciąg znaków alfanumerycznych & Zmienna logiczna rozumiana jako formuła atomowa\\
+  Ciąg znaków składający się z małych liter oraz cyfr & Zmienna logiczna rozumiana jako formuła atomowa\\
   \hline
   ![formuła] & Jednoargumentowy operator negacji\\
   \hline
@@ -152,7 +154,7 @@ Po zakończeniu działania algorytmu program wyświetli uzyskane drzewo dekompoz
   \hline
   Koniunkcja, alternatywa, alternatywa wykluczająca & Średni\\
   \hline
-  Implikacja, Ekwiwalencja & Najniższy\\
+  Implikacja, ekwiwalencja & Najniższy\\
   \hline
 \end{tabular}
 
@@ -160,7 +162,7 @@ Po zakończeniu działania algorytmu program wyświetli uzyskane drzewo dekompoz
 
 \begin{figure}[!htb]
 \centering
-\includegraphics[height=9cm]{main_alg}
+\includegraphics[height=10cm]{main_alg}
 \caption{Przebieg głównego algorytmu}
 \end{figure}
 
@@ -169,7 +171,7 @@ Po zakończeniu działania algorytmu program wyświetli uzyskane drzewo dekompoz
 \subsubsection{Reguły dekompozycji}
 \label{dekompozycja}
 
-\begin{tabular}{|C{5cm}|C{5cm}|}
+\begin{longtable}{|c|c|}
 \hline
 \textbf{Postać dekompozycji} & \textbf{Nazwa}\\
 \hline
@@ -191,10 +193,6 @@ Po zakończeniu działania algorytmu program wyświetli uzyskane drzewo dekompoz
 \hline
 \Tree [.{$\neg \neg p$} [.{$p$} ] ] &  Negacja negacji\\
 \hline
-\end{tabular}
-
-\begin{tabular}{|C{5cm}|C{5cm}|}
-\hline
 \Tree [.{$\neg X p$} [.{$X \neg P$} ] ] &  Negacja operatora \textit{Next}\\
 \hline
 \Tree[.{$F p$} {$p$} {$X F p$} ] &  Operator \textit{Finally}\\
@@ -207,26 +205,81 @@ Po zakończeniu działania algorytmu program wyświetli uzyskane drzewo dekompoz
 \hline
 \Tree[.{$G p$} {$p$} {$X G p$} ] &  Operator \textit{Globally}\\
 \hline
-\end{tabular}
+\end{longtable}
 
 \subsubsection{Algorytm metody tablic semantycznych}
+\label{tableau}
+Metoda tablic semantycznych opiera się o budowanie drzewa (w zasadzie grafu skierowanego, który może zostać uproszczony do drzewa, co wyjaśniono w punkcie \ref{Implementacja}) poprzez dekomponowanie kolejnych podwyrażeń składających się na wejściową formułę logiczną zgodnie z zasadami przytoczonymi w \ref{dekompozycja}. W trakcie dekompozycji kolejne powstające podformuły (a także węzły drzewa) oznaczane są jako sprawdzone, w celu uniknięcia ich kilkukrotnego przetwarzania. Odrzucenie ich nie jest możliwie, ze względu na konieczność odwoływania się do węzłów poprzedzających w niektórych krokach algorytmu.
+\linebreak
+Algorytm metody tablic semantycznych przebiega następująco:
 \begin{enumerate}
 	\item Tworzenie korzenia drzewa zawierającego formułę wejściową (lub jej zaprzeczenie)
 	\item Dekompozycja następnego w kolejności wyrażenia logicznego. Kolejność dekomponowania wyrażeń znajdujących się w węzłach drzewa jest dowolna, jednak ze względu efektywność algorytmu najlepiej przyjąć następujący porządek:
 	\begin{itemize}
-	\item[1] Dekomponowanie wyrażeń niepowodujących rozgałęziania
-	\item[2] Dekomponowanie wyrażeń powodujących rozgałęzianie oraz tworzących dwa pod-wyrażenia w węzłach potomnych
-	\item[3] Dekomponowanie wyrażeń powodujących rozgałęzianie oraz tworzących jedno wyrażenie w węzłach potomnych
+	\item[1.] Dekomponowanie wyrażeń niepowodujących rozgałęziania
+	\item[2.] Dekomponowanie wyrażeń powodujących rozgałęzianie oraz tworzących dwa pod-wyrażenia w węzłach potomnych
+	\item[3.] Dekomponowanie wyrażeń powodujących rozgałęzianie oraz tworzących jedno wyrażenie w węzłach potomnych
 	\end{itemize}
-	\item W przypadku węzła, który zawiera wyrażenia z operatorem \textit{Next} - rozszerzenie drzewa, przez przyłączenie potomka zawierającego wyrażenia nieatomiczne, z usuniętym zewnętrznym operatorem \textit{Next}, lub w przypadku gdy takie wyrażenie już występowało w nadrzędnym węźle, utworzenie ścieżki do tego węzła
-	\item Dekompozycję powtarza się, w każdym węźle nie zostaną sprawdzone wszystkie wyrażenia
+	\item W przypadku węzła, który zawiera wyrażenia z operatorem \textit{Next} - rozszerzenie drzewa, przez przyłączenie potomka zawierającego wyrażenia nieatomiczne, z usuniętym zewnętrznym operatorem \textit{Next}, lub w przypadku gdy takie wyrażenie już występowało w nadrzędnym węźle, utworzenie ścieżki do tego węzła (jest to połączenie cykliczne)
+	\item Punkt 2 i 3 algorytmu powtarza się, dopóki w drzewie znajdują się niesprawdzone, nieelementarne wyrażenia
 	\item Eliminacja węzłów - węzeł oznacza się jako usunięty, jeśli:
 	\begin{itemize}
-	\item[1] Zawiera on dwie osobne formuły, które są zmienną logiczną i jej zaprzeczeniem
-	\item[2] Wszyscy potomkowie węzła zostali usunięci
-	\item[3] Jeśli węzeł zawiera operatory temporalne $F p$ lub $q U p$ i jeśli nie istnieje w drzewie ścieżka prowadząca do węzła zawierającego formułę $p$ 
+	\item[1.] Zawiera on dwie osobne formuły, które są wyrażeniem atomicznym i jego zaprzeczeniem
+	\item[2.] Wszyscy potomkowie danego węzła zostali usunięci
+	\item[3.] Jeśli węzeł zawiera wyrażenia postaci $F p$ lub $q U p$ i jeśli nie istnieje w drzewie ścieżka prowadząca do węzła zawierającego formułę $p$ 
 	\end{itemize}
 	\item Interpretacja wyników - jeżeli korzeń drzewa został usunięty, to formuła jest niespełnialna (w przypadku, gdy w korzeniu zostało podane jej zaprzeczenie jest spełnialna)
 \end{enumerate}
+
+\subsection{Implementacja}
+\label{Implementacja}
+
+\begin{figure}[!htb]
+\centering
+\includegraphics[width=13cm]{classDiagram}
+\caption{Diagram klas składowych}
+\end{figure}
+
+W kolejnych podpunktach przedstawiony został uproszczony (niezawierający szczegółów implementacyjnych nieistotnych w kontekście zasady działania) opis implementacji algorytmu metody tablic semantycznych.
+
+\subsubsection{Reprezentacja formuły logicznej}
+Za reprezentację pojedynczej formuły logicznej odpowiada klasa \textit{StringFormula}. Operuje ona na wyrażeniach zapisanych w postaci infiksowej (w notacji polskiej), co znacznie ułatwia ich parsowanie i dekompozycję. Formuła przechowywana jest w postaci tablicy tokenów (\textit{tokenArray}, typ \textit{token} jest typem wyliczeniowym stanowiącym semantyczną definicję tokena) oraz w postaci odpowiadających im symboli (\textit{symbolArray}). Klasa \textit{StringFormula} implementuje wszystkie metody, które w algorytmie operują na jednostkowych formułach logicznych:
+\begin{itemize}
+	\item Wykonującej właściwą dekompozycję formuły logicznej (\textit{decompose()}) zwracającej typ wykonanej dekompozycji reprezentowanej przez typ wyliczeniowy \textit{decomposeType})
+	\item Określającej typ następnej dekompozycji (\textit{getType()})
+	\item Określającej, czy formuła składa się tylko ze zmiennej logicznej (\textit{isPreposition()}) lub jej zaprzeczenia (\textit{isPrepositionNegation()})
+	\item Określającej, czy formuła jest pusta (\textit{isEmpty()})
+	\item Zwracającej podformułę logiczną (\textit{needsSatisfaction()}), której istnienie jest wymagane do spełnienia formuły (patrz \ref{tableau}, punkt 5)
+\end{itemize}
+
+
+\subsubsection{Reprezentacja węzła drzewa}
+\label{node}
+Pojedynczy węzeł drzewa dekompozycji jest reprezentowany przez klasę \textit{FormulaNode}. Jej podstawowym atrybutem jest tablica przechowywanych formuł logicznych (\textit{formulas}) oraz odpowiadająca im tablica, określająca, czy dana formuła została już przetworzona (\textit{isChecked}). Poza tymi elementami, obiekt tej klasy przechowuje również informację o wyeliminowaniu węzła, który reprezentuje (\textit{eliminated}, oraz powiązane z tym atrybutem metody \textit{isEliminated()} i \textit{setEliminated()}). Ostatnim kluczowym atrybutem jest iterator (\textit{feedbackPath}) wskazujący na węzeł zawierający formułę po usunięciu skrajnego operatora temporalnego \textit{Next} (opisano w \ref{tableau}). W przypadku obiektu klasy \textit{tree} pochodzącego z biblioteki \textit{tree.hh} iterator stanowi najprostszy sposób na odwołania się do danego elementu drzewa. Przechowywanie referencji do węzła (w tej specyficznej postaci) pozwala na zredukowanie podstawowej struktury danych do postaci drzewa (zamiast grafu skierowanego). Oczywiście zabieg ten posiada dalsze implikacje (opisane w \ref{tree}).
+
+\begin{figure}[!htb]
+\centering
+\includegraphics[width=9cm]{Diagram2}
+\caption{Zastąpienie ścieżki cyklicznej w grafie (a) dodatkową zmienną w węźle, przechowującą referencję (b)}
+\end{figure}
+
+W skład klasy \textit{FormulaNode} wchodzą również wszystkie inne metody konieczne do wykonania algorytmu:
+\begin{itemize}
+	\item Przyłączenie formuły logicznej do węzła (\textit{appendFormula()})
+	\item Sprawdzenie, czy węzeł jest pusty (\textit{isEmpty()})
+	\item Określenie, jakie formuły muszą zostać spełnione, aby węzeł nie został odrzucony (\textit{toSatisfy()}, opisano w \ref{tableau})
+	\item Sprawdzenie, czy węzeł zawiera daną formułę (\textit{contains()})
+	\item Wykonanie dekompozycji kolejnej formuły, zgodnie z heurystyką przedstawioną w \ref{tableau}. Dodatkowo w celu zwiększania wydajności obliczeniowej po powstaniu każdego nowego węzła rozpatrywana jest możliwość jego eliminacji, co pozwala na uniknięcie dalszej dekompozycji węzłów niemających wpływu na całościowy wynik działania
+\end{itemize}
+
+\subsection{Reprezentacja drzewa dekompozycji}
+\label{tree}
+Ostatnią kluczową klasą składową jest klasa \textit{TruthTree}, agregująca obydwie przedstawione wcześniej podklasy, reprezentująca drzewo dekompozycji formuły. Jest to \textit{wrapper} klasy drzewa zdefiniowanej w bibliotece \textit{tree.hh}. Poza głównym drzewem dekompozycji (\textit{mainTree}), w klasie przechowywana jest informacja o korzeniu drzewa (w postaci iteratora). W skład metod klasy wchodzą istotne metody pomocnicze, tzn. \textit{existsPath} oraz \textit{findFormula}. Pierwsza z nich sprawdza istnienie ścieżki pomiędzy dwoma węzłami wchodzącymi w skład głównego drzewa, a więc umożliwia rozstrzygnięcie problemu eliminacji węzła w przypadku wystąpienia operatorów temporalnych \textit{Finally} i \textit{Until}. W implementacji metody wzięto pod uwagę możliwość wystąpienia ścieżki cyklicznej (reprezentowanej w sposób omówiony w \ref{node}), która może być skutkiem obecności operatora temporalnego \textit{Next}. Metoda \textit{findFormula} pozwala na określenie, czy w całym drzewie wystąpiła dana formuła logiczna i w którym węźle się ona znajduje. Podstawowymi metodami, wywoływanymi przez użytkownika końcowego są:
+\begin{itemize}
+	\item Przeprowadzenie całego procesu dekompozycji wejściowej formuły (\textit{decomposeAll()})
+	\item Przeprowadzenie jednego kroku dekompozycji (\textit{decomposeStep()})
+	\item Przeprowadzenie procesu eliminacji węzłów (\textit{eliminateNodes()}) - jego wykonanie po zakończeniu wykonania algorytmu jest konieczne, pomimo wspomnianej (\ref{node}) eliminacji częściowej
+	\item Określenie spełnialności formuły (\textit{getResult()})
+\end{itemize}
 
 \end{document}
