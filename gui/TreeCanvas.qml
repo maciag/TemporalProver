@@ -101,7 +101,12 @@ Canvas
 		for(var i = 0; i < formulas.length; i++)
 		{
 			res += (i%2 ? "<font color='#008000'>" : "<font color='#000080'>");
-			res += cppBridge.toInfix(formulas[i]);
+			
+			var formula = cppBridge.toInfix(formulas[i]);
+			formula = formula.split("<").join("&lt;");
+			formula = formula.split(">").join("&gt;");
+			
+			res += formula;
 			res += "</font>";
 			
 			if(i != formulas.length-1)

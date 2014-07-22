@@ -182,4 +182,7 @@ void initGUI()
 	bridge->engine->rootContext()->setContextProperty("cppBridge", bridge);
 	
 	app->exec();
+	
+	delete app;
+	delete bridge;
 }

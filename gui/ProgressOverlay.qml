@@ -7,7 +7,7 @@ Overlay
 	property string status;
 	
 	id: progressOverlay;
-	title: "Liczę...";
+	title: "Rozkładanie...";
 	dialogHeight: 43;
 	
 	closeButton: ToolButton
