@@ -41,9 +41,6 @@ Overlay
 	
 	function setFormula(text)
 	{
-		text = text.replace("<", "&lt;");
-		text = text.replace(">", "&gt;");
-		
 		formulaArea.text = text;
 	}
 }

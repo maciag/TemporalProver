@@ -20,7 +20,7 @@ void WorkerThread::run() {
 		//emit stepDone(QString::fromStdString(truthTree.toFormattedString()));
 	}
 	truthTree.eliminateNodes();
-	cout << "Eliminated" << endl;
+	
 	stopLock.lock();
 	if (stop)
 		return;
