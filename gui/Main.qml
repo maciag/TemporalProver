@@ -30,7 +30,11 @@ ApplicationWindow
 		{
 			if(ioMode == "formula")
 			{
-				ioTargetComponent.text = cppBridge.loadFile(fileUrl);
+				var formula = cppBridge.loadFile(fileUrl);;
+				formula = formula.split("<").join("&lt;");
+				formula = formula.split(">").join("&gt;");
+				
+				ioTargetComponent.text = formula;
 			}
 			
 			else if(ioMode == "operators")

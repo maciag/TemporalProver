@@ -73,8 +73,8 @@ Overlay
 	
 	function setFormula(text)
 	{
-		text = text.replace("<", "&lt;");
-		text = text.replace(">", "&gt;");
+		text = text.split("<").join("&lt;");
+		text = text.split(">").join("&gt;");
 		
 		formulaArea.text = text;
 	}
