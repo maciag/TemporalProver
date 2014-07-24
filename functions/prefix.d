@@ -23,7 +23,7 @@ char[] pop(ref char[] stack)
 	if(stack[$-1] == '\t')  // Obcinamy ostatnią spację
 		stack.length--;
 	
-	long lastSpace = stack.lastIndexOf("\t");  // Znajdujemy początek słowa
+	auto lastSpace = stack.lastIndexOf("\t");  // Znajdujemy początek słowa
 	
 	if(lastSpace == -1)
 	{
