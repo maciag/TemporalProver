@@ -115,7 +115,7 @@ extern(C) bool validate_C(char* infix)
 {
 	Runtime.initialize();
 	
-	char[] dstr = toImpl!(string, char*)(infix);
+	char[] dstr = toImpl!(char[], char*)(infix);
 	return validate(dstr);
 }
 
@@ -132,7 +132,7 @@ extern(C) immutable(char)* toPrefix_C(char* infix)
 {
 	Runtime.initialize();
 	
-	char[] dstr = toImpl!(string, char*)(infix);
+	char[] dstr = toImpl!(char[], char*)(infix);
 	dstr = toPrefix(dstr);
 	
 	return toStringz(dstr);
@@ -151,7 +151,7 @@ extern(C) immutable(char)* toInfix_C(char* prefix)
 {
 	Runtime.initialize();
 	
-	char[] dstr = toImpl!(string, char*)(prefix);
+	char[] dstr = toImpl!(char[], char*)(prefix);
 	dstr = toInfix(dstr);
 	
 	return toStringz(dstr);

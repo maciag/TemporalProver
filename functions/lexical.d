@@ -79,7 +79,7 @@ public void resetOperators()
  */
 public void clearOperators()
 {
-	operators.clear();
+	operators.destroy();
 }
 
 /**
