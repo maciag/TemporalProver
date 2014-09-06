@@ -6,6 +6,7 @@
 #include <iterator>
 #include <iostream>
 #include <string>
+#include <vector>
 
 #include "../functions/prefix.h"
 #include "LexicalTable.hpp"

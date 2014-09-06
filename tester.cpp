@@ -6,7 +6,7 @@
 #include <map>
 using namespace std;
 
-int main() {
+/*int main() {
 
 	// Ustawiam domyślny zestaw operatorów
 	resetOperators_C();
@@ -99,4 +99,4 @@ int main() {
 		cout << "Formuła wejściowa niespełnialna" << endl;
 
 	return 0;
-}
+}*/

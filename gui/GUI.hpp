@@ -1,16 +1,15 @@
 #ifndef GUI_HPP
 #define GUI_HPP
 
-#include <QApplication>
+#include <QtWidgets/QApplication>
 #include <QObject>
-#include <QQmlContext>
-#include <QQmlApplicationEngine>
-#include <QtQml>
+#include <QtQml/QQmlContext>
+#include <QtQml/QQmlApplicationEngine>
+#include <QtQml/QtQml>
 #include <QUrl>
-
-#include <../functions/prefix.h>
-#include <../truthtrees/WorkerThread.hpp>
-#include <../truthtrees/LexicalTable.hpp>
+#include "../functions/prefix.h"
+#include "../truthtrees/WorkerThread.hpp"
+#include "../truthtrees/LexicalTable.hpp"
 
 /**
  * Klasa służąca do wywoływania metod C++ z poziomu QML.

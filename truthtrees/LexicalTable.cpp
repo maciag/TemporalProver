@@ -1,15 +1,15 @@
 #include "LexicalTable.hpp"
 
-map<string, token> tokenMap = { { string("!"), token::tneg }, {
-		string("&"), token::tand }, { string("|"), token::tor }, { string("^"),
-		token::txor }, { string(">"), token::timp },
-		{ string("="), token::teq }, { string("X"), token::tnext }, { string(
-				"F"), token::tfin }, { string("U"), token::tunt }, { string(
-				"G"), token::talw } };
+map<string, token> tokenMap = { { string("!"), tneg }, {
+        string("&"), tand }, { string("|"), tor }, { string("^"),
+        txor }, { string(">"), timp },
+        { string("="), teq }, { string("X"), tnext }, { string(
+                "F"), tfin }, { string("U"), tunt }, { string(
+                "G"), talw } };
 
-map<token, string> symbolMap = { { token::tneg, string("!") }, {
-		token::tand, string("&") }, { token::tor, string("|") }, { token::txor,
-		string("^") }, { token::timp, string(">") },
-		{ token::teq, string("=") }, { token::tnext, string("X") }, {
-				token::tfin, string("F") }, { token::tunt, string("U") }, {
-				token::talw, string("G") } };
+map<token, string> symbolMap = { { tneg, string("!") }, {
+        tand, string("&") }, { tor, string("|") }, { txor,
+        string("^") }, { timp, string(">") },
+        { teq, string("=") }, { tnext, string("X") }, {
+                tfin, string("F") }, { tunt, string("U") }, {
+                talw, string("G") } };

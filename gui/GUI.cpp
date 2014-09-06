@@ -171,9 +171,9 @@ void QmlBridge::threadFinished(QString resTree, bool result)
 void initGUI()
 {
 	int argc = 0;
-	char **argv = NULL;
+    char **argv = NULL;
 	
-	QApplication *app = new QApplication(argc, argv);
+    QApplication *app = new QApplication(argc, argv);
 	
 	QmlBridge::declareQML();
 	QmlBridge *bridge = new QmlBridge();

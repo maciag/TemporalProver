@@ -1,0 +1,13 @@
+INPUT(
+./debug\GUI.o
+./debug\FormulaNode.o
+./debug\LexicalTable.o
+./debug\StringFormula.o
+./debug\TruthTree.o
+./debug\WorkerThread.o
+./debug\main.o
+./debug\tester.o
+./debug\prefix.o
+./debug\moc_GUI.o
+./debug\moc_WorkerThread.o
+);

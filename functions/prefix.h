@@ -1,28 +1,31 @@
 #ifndef PREFIX_H
 #define PREFIX_H
 
-extern "C" const int ERRCODE_OK;
-extern "C" const int ERRCODE_UNEXPECTED_END;
-extern "C" const int ERRCODE_UNEXPECTED_VAR;
-extern "C" const int ERRCODE_UNEXPECTED_BIN_OPER;
-extern "C" const int ERRCODE_UNEXPECTED_UN_OPER;
-extern "C" const int ERRCODE_UNEXPECTED_LBRACK;
-extern "C" const int ERRCODE_UNEXPECTED_RBRACK;
-extern "C" const int ERRCODE_INVALID_TOKEN;
-extern "C" const int ERRCODE_BRACKET_UNCLOSED;
-extern "C" const int ERRCODE_SPARE_RBRACK;
 
-extern "C" void setOperator_C(char *op, int precedence, bool unary);
-extern "C" void unsetOperator_C(char *op);
-extern "C" void resetOperators_C();
-extern "C" void clearOperators_C();
-extern "C" int getOperatorArgCount_C(char *op);
+extern const int ERRCODE_OK;
+extern const int ERRCODE_UNEXPECTED_END;
+extern const int ERRCODE_UNEXPECTED_VAR;
+extern const int ERRCODE_UNEXPECTED_BIN_OPER;
+extern const int ERRCODE_UNEXPECTED_UN_OPER;
+extern const int ERRCODE_UNEXPECTED_LBRACK;
+extern const int ERRCODE_UNEXPECTED_RBRACK;
+extern const int ERRCODE_INVALID_TOKEN;
+extern const int ERRCODE_BRACKET_UNCLOSED;
+extern const int ERRCODE_SPARE_RBRACK;
 
-extern "C" int getErrorCode_C();
-extern "C" char* getErrorToken_C();
-extern "C" int getErrorPosition_C();
+void setOperator_C(char *op, int precedence, bool unary);
+void unsetOperator_C(char *op);
+void resetOperators_C();
+void clearOperators_C();
+int getOperatorArgCount_C(char *op);
 
-extern "C" bool validate_C(char *infix);
-extern "C" char* toPrefix_C(char *infix);
-extern "C" char* toInfix_C(char *prefix);
+int getErrorCode_C();
+char* getErrorToken_C();
+int getErrorPosition_C();
+
+bool validate_C(char *infix);
+char* toPrefix_C(char *infix);
+char* toInfix_C(char *prefix);
+
+
 #endif
