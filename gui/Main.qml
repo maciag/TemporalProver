@@ -348,6 +348,8 @@ ApplicationWindow
 */					
 					var formula = conclusionLabel.text;
 					
+					progressOverlay.title = "Rozkładanie...";
+					progressOverlay.closeButton.visible = true;
 					progressOverlay.visible = true;
 					cppBridge.startComputation(negate.checked ? operatorEditOverlay.not + "(" + formula + ")" : formula);
 				}
@@ -448,7 +450,8 @@ ApplicationWindow
 			tree.canvas.nodeClicked.connect(nodePreview);
 		
 		// Ukrywamy nakładkę postępu i zmieniamy zakładkę
-		progressOverlay.visible = false;
+		progressOverlay.title = "Renderowanie...";
+		progressOverlay.closeButton.visible = false;
 		tabs.currentIndex = 0;
 	}
 	
@@ -477,6 +480,10 @@ ApplicationWindow
 */
 	function editConc(formula)
 	{
+		progressOverlay.title = "Renderowanie...";
+		progressOverlay.closeButton.visible = false;
+		progressOverlay.visible = true;
+		
 		conclusionLabel.text = formula;
 		
 //		predList.selection.clear();

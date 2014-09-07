@@ -1,5 +1,5 @@
 prover
-tester
+prover.exe
 lib/*
 obj/*
 moc/*

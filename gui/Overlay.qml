@@ -50,6 +50,7 @@ Item
 			width: parent.width;
 			id: titlebar;
 			spacing: 0;
+			height: 34;
 			
 			Label
 			{

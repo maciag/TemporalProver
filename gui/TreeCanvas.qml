@@ -54,6 +54,8 @@ Canvas
 	
 	onPaint:
 	{
+		visible = false;
+		
 		var context = getContext("2d");
 		
 		context.strokeStyle = "black";
@@ -91,6 +93,12 @@ Canvas
 		{
 			context.fillText(nodes[i].token, margin+20*nodes[i].x+10, margin+40*nodes[i].y+12);
 		}
+	}
+	
+	onPainted:
+	{
+		progressOverlay.visible = false;
+		visible = true;
 	}
 	
 	function formulaGroupToInfix(formulaGroup)
