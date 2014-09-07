@@ -3,5 +3,9 @@ tester
 lib/*
 obj/*
 moc/*
-gui/Makefile
-truthtrees/Makefile
+Makefile*
+.project*
+*debug*
+*Debug*
+*release*
+*Release*
