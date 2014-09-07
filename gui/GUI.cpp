@@ -8,30 +8,22 @@ using namespace std;
 
 bool QmlBridge::validate(QString formula)
 {
-	QByteArray bytearray = formula.toUtf8();
-	char* cstr = bytearray.data();
-	return validate_C(cstr);
+	return validate_C(formula);
 }
 
 QString QmlBridge::toPrefix(QString formula)
 {
-	QByteArray bytearray = formula.toUtf8();
-	char* cstr = bytearray.data();
-	return QString::fromUtf8(toPrefix_C(cstr));
+	return toPrefix_C(formula);
 }
 
 QString QmlBridge::toInfix(QString formula)
 {
-	QByteArray bytearray = formula.toUtf8();
-	char* cstr = bytearray.data();
-	return QString::fromUtf8(toInfix_C(cstr));
+	return toInfix_C(formula);
 }
 
 int QmlBridge::getOperatorArgCount(QString formula)
 {
-	QByteArray bytearray = formula.toUtf8();
-	char* cstr = bytearray.data();
-	return getOperatorArgCount_C(cstr);
+	return getOperatorArgCount_C(formula);
 }
 
 // Ustawienie operatora wykorzystywanego przez TruthTree (pośrednio)
@@ -105,7 +97,7 @@ QmlBridge::ErrorCode QmlBridge::getErrorCode()
 
 QString QmlBridge::getErrorToken()
 {
-	return QString::fromUtf8(getErrorToken_C());
+	return getErrorToken_C();
 }
 
 int QmlBridge::getErrorPosition()
@@ -115,10 +107,7 @@ int QmlBridge::getErrorPosition()
 
 void QmlBridge::setParserOperator(QString symbol, int precedence, bool unary)
 {
-	QByteArray bytearray = symbol.toUtf8();
-	char* cstr = bytearray.data();
-	
-	setOperator_C(cstr, precedence, unary);
+	setOperator_C(symbol, precedence, unary);
 }
 
 void QmlBridge::clearParserOperators()

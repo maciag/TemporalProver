@@ -1,31 +1,21 @@
 #ifndef PREFIX_H
 #define PREFIX_H
 
+#include "lexical.h"
 
-extern const int ERRCODE_OK;
-extern const int ERRCODE_UNEXPECTED_END;
-extern const int ERRCODE_UNEXPECTED_VAR;
-extern const int ERRCODE_UNEXPECTED_BIN_OPER;
-extern const int ERRCODE_UNEXPECTED_UN_OPER;
-extern const int ERRCODE_UNEXPECTED_LBRACK;
-extern const int ERRCODE_UNEXPECTED_RBRACK;
-extern const int ERRCODE_INVALID_TOKEN;
-extern const int ERRCODE_BRACKET_UNCLOSED;
-extern const int ERRCODE_SPARE_RBRACK;
+#include <QString>
+#include <QStringList>
 
-void setOperator_C(char *op, int precedence, bool unary);
-void unsetOperator_C(char *op);
-void resetOperators_C();
-void clearOperators_C();
-int getOperatorArgCount_C(char *op);
+QString toPrefix_C(QString infix);
+char *toPrefix_C(char *infix);
+QString toInfix_C(QString prefix);
+char *toInfix_C(char *prefix);
 
-int getErrorCode_C();
-char* getErrorToken_C();
-int getErrorPosition_C();
+QString pop(QString & stack);
+void push(QString & stack, QString word);
+void buildPrefixExpression(QString & stack, QString oper);
+void buildInfixExpression(QString & stack, QString oper);
 
-bool validate_C(char *infix);
-char* toPrefix_C(char *infix);
-char* toInfix_C(char *prefix);
-
-
+QString toPrefix(QString infix);
+QString toInfix(QString prefix);
 #endif

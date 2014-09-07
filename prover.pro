@@ -1,4 +1,5 @@
 HEADERS += \
+	functions/lexical.h \
     functions/prefix.h \
     gui/GUI.hpp \
     include/tree.hh \
@@ -16,9 +17,11 @@ SOURCES += \
     truthtrees/TruthTree.cpp \
     truthtrees/WorkerThread.cpp \
     main.cpp \
-    tester.cpp \
+    functions/lexical.cpp \
     functions/prefix.cpp
 
 
 CONFIG += c++11
 QT += core gui quick widgets
+OBJECTS_DIR = obj
+MOC_DIR = moc
